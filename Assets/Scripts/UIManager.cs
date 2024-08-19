@@ -4,10 +4,13 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public CityStats cityStats;
+    public GridManager gridManager;
 
     public Text populationText;
     public Text moneyText;
     public Text happinessText;
+
+    public Text gridCoordinatesText;
 
     private Zone.ZoneType selectedZoneType;
 
@@ -35,13 +38,13 @@ public class UIManager : MonoBehaviour
         populationText.text = "Population: " + cityStats.population;
         moneyText.text = "Money: $" + cityStats.money;
         happinessText.text = "Happiness: " + cityStats.happiness;
+        gridCoordinatesText.text = "Grid Coordinates: " + "x: " + gridManager.mouseGridPosition.x + ", y: " + gridManager.mouseGridPosition.y;
     }
 
     public void OnTileClicked(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
     {
         if (cityStats.CanAfford(zoneAttributes.Cost))
         {
-            Debug.Log("Placing zone: " + zoneType);
             cityStats.AddMoney(zoneAttributes.Money);
             cityStats.AddPopulation(zoneAttributes.Population);
             cityStats.AddHappiness(zoneAttributes.Happiness);
@@ -74,7 +77,6 @@ public class UIManager : MonoBehaviour
 
     public void OnRoadButtonClicked()
     {
-        Debug.Log("Road button clicked");
         selectedZoneType = Zone.ZoneType.Road;
         var zoneAttributes = new ZoneAttributes(-50, 0, 0, 50);
     }
@@ -87,7 +89,6 @@ public class UIManager : MonoBehaviour
 
     public Zone.ZoneType GetSelectedZoneType()
     {
-        Debug.Log("selectedZoneType" + selectedZoneType);
         return selectedZoneType;
     } 
 }
