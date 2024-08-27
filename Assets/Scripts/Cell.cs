@@ -8,7 +8,14 @@ public class Cell : MonoBehaviour
         Residential,
         Commercial,
         Industrial,
-        Road
+        Road,
+        Water,
+        Power,
+        Fire,
+        Police,
+        Hospital,
+        School,
+        Park
     }
 
     public TileType tileType;
@@ -17,6 +24,8 @@ public class Cell : MonoBehaviour
     public bool hasRoadAtRight;
     public bool hasRoadAtBottom;
     public int population;
+
+    public GameObject occupiedBuilding { get; set; }
 
     void Start()
     {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class CityStats : MonoBehaviour
 {
@@ -12,6 +13,11 @@ public class CityStats : MonoBehaviour
     public int roadCount;
     public int grassCount;
 
+    public int cityPowerConsumption;
+    public int cityPowerOutput;
+
+    private List<PowerPlant> powerPlants = new List<PowerPlant>();
+
     void Start()
     {
         population = 0;
@@ -21,6 +27,8 @@ public class CityStats : MonoBehaviour
         industrialZoneCount = 0;
         roadCount = 0;
         grassCount = 0;
+        cityPowerConsumption = 0;
+        cityPowerOutput = 0;
     }
 
     public void AddPopulation(int value)
@@ -95,5 +103,38 @@ public class CityStats : MonoBehaviour
     public bool CanAfford(int cost)
     {
         return money >= cost;
+    }
+
+    public void RegisterPowerPlant(PowerPlant powerPlant)
+    {
+        powerPlants.Add(powerPlant);
+
+        int totalPowerOutput = 0;
+        foreach (var plant in powerPlants)
+        {
+            totalPowerOutput += plant.PowerOutput;
+        }
+        
+        cityPowerOutput = totalPowerOutput;
+    }
+
+    public int GetTotalPowerOutput()
+    {
+        return cityPowerOutput;
+    }
+
+    public void AddPowerConsumption(int value)
+    {
+        cityPowerConsumption += value;
+    }
+
+    public void RemovePowerConsumption(int value)
+    {
+        cityPowerConsumption -= value;
+    }
+
+    public int GetTotalPowerConsumption()
+    {
+        return cityPowerConsumption;
     }
 }

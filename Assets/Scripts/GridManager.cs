@@ -26,13 +26,17 @@ public class GridManager : MonoBehaviour
     public GameObject roadTilePrefabElbowDownLeft;
     public GameObject roadTilePrefabElbowDownRight;
 
-    private Vector3 startPosition;
+    private Vector2 startPosition;
     private bool isDrawingRoad = false;
 
-    private List<GameObject> previewRoadTiles = new List<GameObject>();
-    private List<GameObject> adjacentRoadTiles = new List<GameObject>();
+    private bool isPlacingBuilding = false;
 
-    public Vector3 mouseGridPosition;
+    private List<GameObject> previewRoadTiles = new List<GameObject>();
+
+    private List<Vector2> previewRoadGridPositions = new List<Vector2>();
+    private List<Vector2> adjacentRoadTiles = new List<Vector2>();
+
+    public Vector2 mouseGridPosition;
 
     void Start()
     {
@@ -69,7 +73,7 @@ public class GridManager : MonoBehaviour
 
                 // Set a low sorting order for the grass tile
                 SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
-                sr.sortingOrder = -1000; // Use a very low value to ensure it's always in the background
+                sr.sortingOrder = -1001; // Use a very low value to ensure it's always in the background
 
 
                 // Ensure the zoneTile has a PolygonCollider2D
@@ -95,15 +99,15 @@ public class GridManager : MonoBehaviour
         switch (zoneType)
         {
             case Zone.ZoneType.Residential:
-                return new ZoneAttributes(-100, 10, 5, 100);
+                return ZoneAttributes.Residential;
             case Zone.ZoneType.Commercial:
-                return new ZoneAttributes(-200, 20, 10, 200);
+                return ZoneAttributes.Commercial;
             case Zone.ZoneType.Industrial:
-                return new ZoneAttributes(-300, 30, 15, 300);
+                return ZoneAttributes.Industrial;
             case Zone.ZoneType.Road:
-                return new ZoneAttributes(-50, 0, 0, 50);
+                return ZoneAttributes.Road;
             case Zone.ZoneType.Grass:
-                return new ZoneAttributes(1, 0, 1, 0);
+                return ZoneAttributes.Grass;
             default:
                 return null;
         }
@@ -116,9 +120,19 @@ public class GridManager : MonoBehaviour
             Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mouseGridPosition = GetGridPosition(worldPoint);
 
+            if (mouseGridPosition.x < 0 || mouseGridPosition.x >= width || mouseGridPosition.y < 0 || mouseGridPosition.y >= height)
+            {
+                return;
+            }
+
+            if (uiManager.isBulldozeMode())
+            {
+                HandleBulldozerMode(mouseGridPosition);
+            }
+
             if (IsInRoadDrawingMode())
             {
-                HandleRaycast(worldPoint);
+                HandleRaycast(mouseGridPosition);
             }
         }
         catch (System.Exception ex)
@@ -127,89 +141,154 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    void HandleBulldozerMode(Vector2 gridPosition)
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            HandleBulldozerClick(gridPosition);
+        }
+    }
+
+    void HandleBulldozerClick(Vector2 gridPosition)
+    {
+        GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
+
+        Zone zone = cell.transform.GetChild(0).GetComponent<Zone>();
+
+        IBuilding building = cell.GetComponent<Cell>().occupiedBuilding?.GetComponent<IBuilding>();
+
+        HandleBulldozeTile(zone, cell);
+    }
+
+    void HandleBulldozeTile(Zone zone, GameObject cell)
+    {
+        if (cell.transform.childCount > 0)
+        {
+            // Destroy(cell.transform.GetChild(0).gameObject);
+            foreach (Transform child in cell.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.tileType = Cell.TileType.Grass;
+
+        GameObject zoneTile = Instantiate(
+            zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass),
+            cell.transform.position,
+            Quaternion.identity
+        );
+
+        zoneTile.transform.SetParent(cell.transform);
+
+        SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
+
+        sr.sortingOrder = -1001;
+
+        cityStats.AddMoney(25);
+
+        ZoneAttributes zoneAttributes = GetZoneAttributes(zone.zoneType);
+        cityStats.RemovePowerConsumption(zoneAttributes.PowerConsumption);
+    }
+
     bool IsInRoadDrawingMode()
     {
         return uiManager.GetSelectedZoneType() == Zone.ZoneType.Road ||
           uiManager.GetSelectedZoneType() == Zone.ZoneType.Residential ||
           uiManager.GetSelectedZoneType() == Zone.ZoneType.Commercial ||
           uiManager.GetSelectedZoneType() == Zone.ZoneType.Industrial ||
-          uiManager.GetSelectedZoneType() == Zone.ZoneType.Grass;
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.Grass ||
+          uiManager.GetSelectedBuilding() != null;
     }
 
-    void HandleRaycast(Vector2 worldPoint)
+    void HandleRaycast(Vector2 gridPosition)
     {
-        RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+          GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
 
-        if (hit.collider != null)
-        {
-            Zone zone = hit.collider.GetComponent<Zone>();
+          Zone.ZoneType selectedZoneType = uiManager.GetSelectedZoneType();
+          IBuilding selectedBuilding = uiManager.GetSelectedBuilding();
 
-            if (zone != null)
-            {
-                Zone.ZoneType selectedZoneType = uiManager.GetSelectedZoneType();
+          if (selectedZoneType == Zone.ZoneType.Road)
+          {
+              HandleRoadDrawing(gridPosition);
+          }
+          else if (selectedBuilding != null)
+          {
+              HandleBuildingPlacement(gridPosition, selectedBuilding);
+          }
+          else
+          {
+              HandleTilePlacement(gridPosition);
+          }
 
-                if (selectedZoneType == Zone.ZoneType.Road)
-                {
-                    HandleRoadDrawing(worldPoint);
-                }
-                else
-                {
-                    HandleTilePlacement(selectedZoneType, zone);
-                }
-            }
-        }
     }
 
-    void HandleTilePlacement(Zone.ZoneType selectedZoneType, Zone zone)
+    void HandleBuildingPlacement(Vector3 gridPosition, IBuilding selectedBuilding)
     {
         if (Input.GetMouseButtonDown(0))
         {
-            PlaceZone(zone.transform.position);
+            PlaceBuilding(gridPosition, selectedBuilding);
+        }
+    }
+        
+
+    void HandleTilePlacement(Vector3 gridPosition)
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            PlaceZone(gridPosition);
         }
     }
 
-    void PlaceZone(Vector3 position)
+    bool canPlaceZone(ZoneAttributes zoneAttributes, Vector3 gridPosition)
     {
+        return zoneAttributes != null && cityStats.CanAfford(zoneAttributes.ConstructionCost) && canPlaceBuilding(gridPosition, 1);
+    }
+
+    void destroyCellChildren(GameObject cell)
+    {
+        if (cell.transform.childCount > 0)
+        {
+            foreach (Transform child in cell.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
+
+    void PlaceZone(Vector3 gridPosition)
+    {
+        Vector2 worldPosition = GetWorldPosition((int)gridPosition.x, (int)gridPosition.y);
         Zone.ZoneType selectedZoneType = uiManager.GetSelectedZoneType();
         var zoneAttributes = GetZoneAttributes(selectedZoneType);
 
-        if (zoneAttributes != null && cityStats.CanAfford(zoneAttributes.Cost))
+        if (canPlaceZone(zoneAttributes, gridPosition))
         {
-            // Find the cell at the given position
-            foreach (GameObject cell in gridArray)
-            {
-                if (cell.transform.position == position)
-                {
-                    // Destroy the current child (existing zone tile)
-                    if (cell.transform.childCount > 0)
-                    {
-                        foreach (Transform child in cell.transform)
-                        {
-                            Destroy(child.gameObject);
-                        }
-                    }
+            GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
 
-                    // Instantiate the new zone tile
-                    GameObject zoneTile = Instantiate(
-                      zoneManager.GetRandomZonePrefab(selectedZoneType),
-                      position,
-                      Quaternion.identity
-                    );
-                    zoneTile.transform.SetParent(cell.transform);
+            destroyCellChildren(cell);
 
-                    // Update the Cell component
-                    Cell cellComponent = cell.GetComponent<Cell>();
-                    cellComponent.tileType = (Cell.TileType)selectedZoneType;
-                    // Update other properties if necessary
+            // Instantiate the new zone tile
+            GameObject zoneTile = Instantiate(
+              zoneManager.GetRandomZonePrefab(selectedZoneType),
+              worldPosition,
+              Quaternion.identity
+            );
+            zoneTile.transform.SetParent(cell.transform);
 
-                    // Set the sorting order for the isometric grid
-                    SetTileSortingOrder(zoneTile);
+            // Update the Cell component
+            Cell cellComponent = cell.GetComponent<Cell>();
+            cellComponent.tileType = (Cell.TileType)selectedZoneType;
+            // Update other properties if necessary
 
-                    // Update CityStats
-                    uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
-                    break;
-                }
-            }
+            // Set the sorting order for the isometric grid
+            SetTileSortingOrder(zoneTile);
+
+            // Update CityStats
+            uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
+
+            cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
         }
     }
 
@@ -222,16 +301,16 @@ public class GridManager : MonoBehaviour
         sr.sortingOrder = -(y * 10 + x) - 100;
     }
 
-    void HandleRoadDrawing(Vector2 worldPoint)
+    void HandleRoadDrawing(Vector2 gridPosition)
     {
         if (Input.GetMouseButtonDown(0))
         {
             isDrawingRoad = true;
-            startPosition = GetGridPosition(worldPoint);
+            startPosition = gridPosition;
         }
         else if (isDrawingRoad && Input.GetMouseButton(0))
         {
-            Vector3 currentMousePosition = GetGridPosition(worldPoint);
+            Vector3 currentMousePosition = gridPosition;
             DrawPreviewLine(startPosition, currentMousePosition);
         }
         
@@ -250,7 +329,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    Vector3 GetGridPosition(Vector2 worldPoint)
+    Vector2 GetGridPosition(Vector2 worldPoint)
     {
         // Convert world point to grid coordinates
         float posX = worldPoint.x / (tileWidth / 2);
@@ -259,7 +338,7 @@ public class GridManager : MonoBehaviour
         int gridX = Mathf.RoundToInt((posY + posX) / 2);
         int gridY = Mathf.RoundToInt((posY - posX) / 2);
 
-        return new Vector3(gridX, gridY, 0);
+        return new Vector2(gridX, gridY);
     }
 
     Vector3 GetWorldPosition(int gridX, int gridY)
@@ -268,23 +347,19 @@ public class GridManager : MonoBehaviour
         float posX = (gridX - gridY) * (tileWidth / 2);
         float posY = (gridX + gridY) * (tileHeight / 2);
 
-        return new Vector3(posX, posY, 0);
+        return new Vector2(posX, posY);
     }
 
-    void DrawPreviewLine(Vector3 start, Vector3 end)
+    void DrawPreviewLine(Vector2 start, Vector2 end)
     {
         ClearPreview();
-        List<Vector3> path = GetLine(start, end);
+        List<Vector2> path = GetLine(start, end);
 
         for (int i = 0; i < path.Count; i++)
         {
-            Vector3 gridPos = path[i];
-            Vector3 worldPos = GetWorldPosition((int)gridPos.x, (int)gridPos.y);
+            Vector2 gridPos = path[i];
 
-            if (IsWithinGrid(worldPos))
-            {
-                DrawPreviewRoadTile(gridPos, worldPos, path, i, true);
-            }
+            DrawPreviewRoadTile(gridPos, path, i, true);
         }
     }
 
@@ -323,15 +398,18 @@ public class GridManager : MonoBehaviour
       SetPreviewTileCollider(previewTile);
       SetSpriteRendererSortingOrder(previewTile, -999);
       SetRoadTileZoneDetails(previewTile);
+      previewTile.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
     }
 
-    void DrawPreviewRoadTile(Vector3 gridPos, Vector3 worldPos, List<Vector3> path, int i, bool isCenterRoadTile = true)
+    void DrawPreviewRoadTile(Vector2 gridPos, List<Vector2> path, int i, bool isCenterRoadTile = true)
     {
-      Vector3 prevGridPos = i == 0 ? (path.Count > 1 ? path[1] : gridPos) : path[i - 1];
+      Vector2 prevGridPos = i == 0 ? (path.Count > 1 ? path[1] : gridPos) : path[i - 1];
 
       bool isPreview = true;
 
       GameObject roadPrefab = GetCorrectRoadPrefab(prevGridPos, gridPos, isCenterRoadTile, isPreview);
+
+      Vector2 worldPos = GetWorldPosition((int)gridPos.x, (int)gridPos.y);
 
       GameObject previewTile = Instantiate(
           roadPrefab,
@@ -340,22 +418,21 @@ public class GridManager : MonoBehaviour
       );
 
       SetPreviewRoadTileDetails(previewTile);
-      previewTile.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
-
+      
       previewRoadTiles.Add(previewTile);
+
+      previewRoadGridPositions.Add(new Vector2(gridPos.x, gridPos.y));
 
       GameObject cell = gridArray[(int)gridPos.x, (int)gridPos.y];
 
       previewTile.transform.SetParent(cell.transform);
     }
 
-    bool isAdjacentRoadInPreview(Vector3 gridPos)
+    bool isAdjacentRoadInPreview(Vector2 gridPos)
     {
-        foreach (GameObject previewRoadTile in previewRoadTiles)
+        foreach (Vector2 previewGridPos in previewRoadGridPositions)
         {
-            Vector3 previewGridPos = GetGridPosition(previewRoadTile.transform.position);
-
-            if (previewGridPos == gridPos)
+            if (gridPos == previewGridPos)
             {
                 return true;
             }
@@ -363,20 +440,14 @@ public class GridManager : MonoBehaviour
         return false;
     }
 
-    void UpdateAdjacentRoadPrefabs(Vector3 gridPos, int i)
+    void UpdateAdjacentRoadPrefabs(Vector2 gridPos, int i)
     {
-        Debug.Log("UpdateAdjacentRoadPrefabs at " + gridPos + " adjRoadTiles: " + adjacentRoadTiles.Count);
-        foreach (GameObject adjacentRoadTile in adjacentRoadTiles)
+        foreach (Vector2 adjacentRoadTile in adjacentRoadTiles)
         {
-            Debug.Log("adjRoadTile: " + adjacentRoadTile);
-            Vector3 adjacentGridPos = GetGridPosition(adjacentRoadTile.transform.position);
-            Vector3 worldPos = GetWorldPosition((int)adjacentGridPos.x, (int)adjacentGridPos.y);
-
             bool isAdjacent = true;
-            if (IsWithinGrid(worldPos) && !isAdjacentRoadInPreview(adjacentGridPos))
+            if (!isAdjacentRoadInPreview(adjacentRoadTile))
             {
-                Debug.Log("Placing adjacent road tile at: " + adjacentGridPos);
-                PlaceRoadTile(adjacentGridPos, i, isAdjacent);
+                PlaceRoadTile(adjacentRoadTile, i, isAdjacent);
             }
         }
     }
@@ -388,6 +459,7 @@ public class GridManager : MonoBehaviour
             Destroy(previewTile);
         }
         previewRoadTiles.Clear();
+        previewRoadGridPositions.Clear();
     }
 
     void DestroyPreviousZoning(GameObject cell)
@@ -417,16 +489,16 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void PlaceRoadTile(Vector3 gridPos, int i = 0, bool isAdjacent = false)
+    void PlaceRoadTile(Vector2 gridPos, int i = 0, bool isAdjacent = false)
     {
         GameObject cell = gridArray[(int)gridPos.x, (int)gridPos.y];
         
         bool isCenterRoadTile = !isAdjacent;
         bool isPreview = false;
 
-        Vector3 prevGridPos = isAdjacent
-            ? (i == 0 ? gridPos : GetGridPosition(previewRoadTiles[i - 1].transform.position))
-            : new Vector3(0, 0, 0);
+        Vector2 prevGridPos = isAdjacent
+            ? (i == 0 ? gridPos : previewRoadGridPositions[i - 1])
+            : new Vector2(0, 0);
 
         GameObject correctRoadPrefab = GetCorrectRoadPrefab(
             prevGridPos,
@@ -434,10 +506,7 @@ public class GridManager : MonoBehaviour
             isCenterRoadTile,
             isPreview
         );
-        if (isAdjacent)
-        {
-            Debug.Log("Placing adjacent road tile at: " + gridPos + " with prefab: " + correctRoadPrefab);
-        }
+
         DestroyPreviousRoadTile(cell);
 
         GameObject roadTile = Instantiate(
@@ -458,9 +527,9 @@ public class GridManager : MonoBehaviour
 
     void DrawRoadLine(bool calculateCost = true)
     {
-        for (int i = 0; i < previewRoadTiles.Count; i++)
+        for (int i = 0; i < previewRoadGridPositions.Count; i++)
         {
-            Vector3 gridPos = GetGridPosition(previewRoadTiles[i].transform.position);
+            Vector2 gridPos = previewRoadGridPositions[i];
 
             PlaceRoadTile(gridPos, i, false);
 
@@ -469,15 +538,19 @@ public class GridManager : MonoBehaviour
 
         if (calculateCost)
         {
-            int totalCost = CalculateTotalCost(previewRoadTiles.Count);
+            int totalCost = CalculateTotalCost(previewRoadGridPositions.Count);
 
             cityStats.RemoveMoney(totalCost);
+
+            int roadPowerConsumption = previewRoadGridPositions.Count * ZoneAttributes.Road.PowerConsumption;
+
+            cityStats.AddPowerConsumption(roadPowerConsumption);
         }
     }
 
-    GameObject GetCorrectRoadPrefab(Vector3 prevGridPos, Vector3 currGridPos, bool isCenterRoadTile = true, bool isPreview = false)
+    GameObject GetCorrectRoadPrefab(Vector2 prevGridPos, Vector2 currGridPos, bool isCenterRoadTile = true, bool isPreview = false)
     {
-        Vector3 direction = currGridPos - prevGridPos;
+        Vector2 direction = currGridPos - prevGridPos;
         if (isPreview)
         {
           
@@ -491,10 +564,10 @@ public class GridManager : MonoBehaviour
           }
         }
 
-        bool hasLeft = IsRoadAt(currGridPos + new Vector3(-1, 0, 0));
-        bool hasRight = IsRoadAt(currGridPos + new Vector3(1, 0, 0));
-        bool hasUp = IsRoadAt(currGridPos + new Vector3(0, 1, 0));
-        bool hasDown = IsRoadAt(currGridPos + new Vector3(0, -1, 0));
+        bool hasLeft = IsRoadAt(currGridPos + new Vector2(-1, 0));
+        bool hasRight = IsRoadAt(currGridPos + new Vector2(1, 0));
+        bool hasUp = IsRoadAt(currGridPos + new Vector2(0, 1));
+        bool hasDown = IsRoadAt(currGridPos + new Vector2(0, -1));
   
         if (isCenterRoadTile) {
           UpdateAdjacentRoadTilesArray(currGridPos, hasLeft, hasRight, hasUp, hasDown, isPreview);
@@ -558,25 +631,25 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void UpdateAdjacentRoadTilesArray(Vector3 currGridPos, bool hasLeft, bool hasRight, bool hasUp, bool hasDown, bool isPreview)
+    void UpdateAdjacentRoadTilesArray(Vector2 currGridPos, bool hasLeft, bool hasRight, bool hasUp, bool hasDown, bool isPreview)
     {
         adjacentRoadTiles.Clear();
 
         if (hasLeft)
         {
-            adjacentRoadTiles.Add(gridArray[(int)currGridPos.x - 1, (int)currGridPos.y]);
+            adjacentRoadTiles.Add(new Vector2(currGridPos.x - 1, currGridPos.y));
         }
         if (hasRight)
         {
-            adjacentRoadTiles.Add(gridArray[(int)currGridPos.x + 1, (int)currGridPos.y]);
+            adjacentRoadTiles.Add(new Vector2(currGridPos.x + 1, currGridPos.y));
         }
         if (hasUp)
         {
-            adjacentRoadTiles.Add(gridArray[(int)currGridPos.x, (int)currGridPos.y + 1]);
+            adjacentRoadTiles.Add(new Vector2(currGridPos.x, currGridPos.y + 1));
         }
         if (hasDown)
         {
-            adjacentRoadTiles.Add(gridArray[(int)currGridPos.x, (int)currGridPos.y - 1]);
+            adjacentRoadTiles.Add(new Vector2(currGridPos.x, currGridPos.y - 1));
         }
     }
 
@@ -603,13 +676,11 @@ public class GridManager : MonoBehaviour
         return isRoad;
     }
 
-    bool IsRoadAt(Vector3 gridPos)
+    bool IsRoadAt(Vector2 gridPos)
     {
         bool isRoad = false;
         int gridX = Mathf.RoundToInt(gridPos.x);
         int gridY = Mathf.RoundToInt(gridPos.y);
-
-        
 
         if (gridX >= 0 && gridX < width && gridY >= 0 && gridY < height)
         {
@@ -621,11 +692,12 @@ public class GridManager : MonoBehaviour
         return false;
     }
 
-    bool IsWithinGrid(Vector3 position)
+    bool IsWithinGrid(Vector2 position)
     {
         foreach (GameObject cell in gridArray)
         {
-            if (cell.transform.position == position)
+            Vector3 position3D = new Vector3(position.x, position.y, 0);
+            if (cell.transform.position == position3D)
             {
                 return true;
             }
@@ -638,9 +710,9 @@ public class GridManager : MonoBehaviour
         return tilesCount * 50;
     }
 
-    List<Vector3> GetLine(Vector3 start, Vector3 end)
+    List<Vector2> GetLine(Vector2 start, Vector2 end)
     {
-        List<Vector3> line = new List<Vector3>();
+        List<Vector2> line = new List<Vector2>();
 
         int x0 = (int)start.x;
         int y0 = (int)start.y;
@@ -655,7 +727,7 @@ public class GridManager : MonoBehaviour
 
         while (true)
         {
-            line.Add(new Vector3(x0, y0, 0));
+            line.Add(new Vector2(x0, y0));
 
             if (x0 == x1 && y0 == y1) break;
 
@@ -673,5 +745,57 @@ public class GridManager : MonoBehaviour
         }
 
         return line;
+    }
+
+    bool canPlaceBuilding (Vector2 gridPosition, int buildingSize) {
+        for (int x = 0; x < buildingSize; x++)
+        {
+            for (int y = 0; y < buildingSize; y++)
+            {
+                int gridX = (int)gridPosition.x + x - buildingSize / 2;
+                int gridY = (int)gridPosition.y + y - buildingSize / 2;
+                if (gridArray[gridX, gridY].transform.childCount > 0 && gridArray[gridX, gridY].transform.GetChild(0).GetComponent<Zone>().zoneType != Zone.ZoneType.Grass)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void PlaceBuilding(Vector2 gridPos, IBuilding iBuilding)
+    {
+        int buildingSize = iBuilding.BuildingSize;
+        GameObject buildingPrefab = iBuilding.Prefab;
+        Vector2 position = GetWorldPosition((int)gridPos.x, (int)gridPos.y);
+
+        if (canPlaceBuilding(gridPos, buildingSize))
+        {
+            GameObject building = Instantiate(buildingPrefab, position, Quaternion.identity);
+            building.transform.SetParent(gridArray[(int)gridPos.x, (int)gridPos.y].transform);
+
+            PowerPlant powerPlant = iBuilding.GameObjectReference.GetComponent<PowerPlant>();
+
+            if (powerPlant != null)
+            {
+                cityStats.RegisterPowerPlant(powerPlant);
+            }
+            SetTileSortingOrder(building);
+
+            for (int x = 0; x < buildingSize; x++)
+            {
+                for (int y = 0; y < buildingSize; y++)
+                {
+                    int gridX = (int)gridPos.x + x - buildingSize / 2;
+                    int gridY = (int)gridPos.y + y - buildingSize / 2;
+
+                    gridArray[gridX, gridY].GetComponent<Cell>().occupiedBuilding = building;
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Cannot place building here, area is not available.");
+        }
     }
 }

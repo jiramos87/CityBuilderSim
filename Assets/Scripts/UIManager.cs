@@ -4,15 +4,23 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public CityStats cityStats;
+    public CursorManager cursorManager;
     public GridManager gridManager;
 
     public Text populationText;
     public Text moneyText;
     public Text happinessText;
-
     public Text gridCoordinatesText;
+    public Text cityPowerOutputText;
+    public Text cityPowerConsumptionText;
 
     private Zone.ZoneType selectedZoneType;
+
+    private IBuilding selectedBuilding;
+
+    public GameObject powerPlantAPrefab;
+
+    public bool bulldozeMode;
 
 
     void Start()
@@ -23,6 +31,7 @@ public class UIManager : MonoBehaviour
         }
 
         selectedZoneType = Zone.ZoneType.Grass;
+        bulldozeMode = false;
     }
 
     void Update()
@@ -38,18 +47,20 @@ public class UIManager : MonoBehaviour
         populationText.text = "Population: " + cityStats.population;
         moneyText.text = "Money: $" + cityStats.money;
         happinessText.text = "Happiness: " + cityStats.happiness;
+        cityPowerOutputText.text = "City Power Output: " + cityStats.cityPowerOutput + " MW";
+        cityPowerConsumptionText.text = "City Power Consumption: " + cityStats.cityPowerConsumption + " MW";
         gridCoordinatesText.text = "Grid Coordinates: " + "x: " + gridManager.mouseGridPosition.x + ", y: " + gridManager.mouseGridPosition.y;
     }
 
     public void OnTileClicked(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
     {
-        if (cityStats.CanAfford(zoneAttributes.Cost))
+        if (cityStats.CanAfford(zoneAttributes.ConstructionCost))
         {
-            cityStats.AddMoney(zoneAttributes.Money);
+            cityStats.RemoveMoney(zoneAttributes.ConstructionCost);
             cityStats.AddPopulation(zoneAttributes.Population);
             cityStats.AddHappiness(zoneAttributes.Happiness);
             cityStats.AddZoneCount(zoneType);
-            cityStats.RemoveMoney(zoneAttributes.Cost);
+            cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
         }
         else
         {
@@ -60,35 +71,93 @@ public class UIManager : MonoBehaviour
     public void OnResidentialButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Residential;
-        var zoneAttributes = new ZoneAttributes(-100, 10, 5, 100);
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
     }
 
     public void OnCommercialButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Commercial;
-        var zoneAttributes = new ZoneAttributes(-200, 20, 10, 200);
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
     }
 
     public void OnIndustrialButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Industrial;
-        var zoneAttributes = new ZoneAttributes(-300, 30, 15, 300);
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
     }
 
     public void OnRoadButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Road;
-        var zoneAttributes = new ZoneAttributes(-50, 0, 0, 50);
+        // cursorManager.SetRoadCursor();
+
+        ClearSelectedBuilding();
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
     }
 
     public void OnGrassButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Grass;
-        var zoneAttributes = new ZoneAttributes(1, 0, 1, 0);
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnPowerPlantAButtonClicked()
+    {
+        ClearSelectedZoneType();
+        
+        GameObject powerPlantObject = Instantiate(powerPlantAPrefab);
+
+        PowerPlant powerPlant = powerPlantObject.AddComponent<PowerPlant>();
+
+        powerPlant.Initialize("Power Plant A", 10000, 100, 50, 25, 3, 10000, powerPlantAPrefab);
+
+        selectedBuilding = powerPlant;
+        Debug.Log("Power Plant A button clicked. Selected building: " + selectedBuilding);
+
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
     }
 
     public Zone.ZoneType GetSelectedZoneType()
     {
         return selectedZoneType;
-    } 
+    }
+
+    public IBuilding GetSelectedBuilding()
+    {
+        return selectedBuilding;
+    }
+
+    void ClearSelectedBuilding()
+    {
+        selectedBuilding = null;
+    }
+
+    void ClearSelectedZoneType()
+    {
+        selectedZoneType = Zone.ZoneType.Grass;
+    }
+
+    public void OnBulldozeButtonClicked()
+    {
+        ClearSelectedBuilding();
+        ClearSelectedZoneType();
+        cursorManager.SetBullDozerCursor();
+        bulldozeMode = true;
+        Debug.Log("Bulldoze button clicked. Bulldoze mode: " + bulldozeMode);
+    }
+
+    public bool isBulldozeMode()
+    {
+      return bulldozeMode;
+    }
 }
