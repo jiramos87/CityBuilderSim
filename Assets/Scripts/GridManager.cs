@@ -36,6 +36,18 @@ public class GridManager : MonoBehaviour
     private List<Vector2> previewRoadGridPositions = new List<Vector2>();
     private List<Vector2> adjacentRoadTiles = new List<Vector2>();
 
+    private List<Vector2> zonedResidentialLightPositions = new List<Vector2>();
+    private List<Vector2> zonedResidentialMediumPositions = new List<Vector2>();
+    private List<Vector2> zonedResidentialHeavyPositions = new List<Vector2>();
+
+    private List<Vector2> zonedCommercialLightPositions = new List<Vector2>();
+    private List<Vector2> zonedCommercialMediumPositions = new List<Vector2>();
+    private List<Vector2> zonedCommercialHeavyPositions = new List<Vector2>();
+
+    private List<Vector2> zonedIndustrialLightPositions = new List<Vector2>();
+    private List<Vector2> zonedIndustrialMediumPositions = new List<Vector2>();
+    private List<Vector2> zonedIndustrialHeavyPositions = new List<Vector2>();
+
     public Vector2 mouseGridPosition;
 
     void Start()
@@ -98,12 +110,42 @@ public class GridManager : MonoBehaviour
     {
         switch (zoneType)
         {
-            case Zone.ZoneType.Residential:
-                return ZoneAttributes.Residential;
-            case Zone.ZoneType.Commercial:
-                return ZoneAttributes.Commercial;
-            case Zone.ZoneType.Industrial:
-                return ZoneAttributes.Industrial;
+            case Zone.ZoneType.ResidentialLightZoning:
+                return ZoneAttributes.ResidentialLightZoning;
+            case Zone.ZoneType.ResidentialMediumZoning:
+                return ZoneAttributes.ResidentialMediumZoning;
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                return ZoneAttributes.ResidentialHeavyZoning;
+            case Zone.ZoneType.ResidentialLightBuilding:
+                return ZoneAttributes.ResidentialLightBuilding;
+            case Zone.ZoneType.ResidentialMediumBuilding:
+                return ZoneAttributes.ResidentialMediumBuilding;
+            case Zone.ZoneType.ResidentialHeavyBuilding:
+                return ZoneAttributes.ResidentialHeavyBuilding;
+            case Zone.ZoneType.CommercialLightZoning:
+                return ZoneAttributes.CommercialLightZoning;
+            case Zone.ZoneType.CommercialMediumZoning:
+                return ZoneAttributes.CommercialMediumZoning;
+            case Zone.ZoneType.CommercialHeavyZoning:
+                return ZoneAttributes.CommercialHeavyZoning;
+            case Zone.ZoneType.CommercialLightBuilding:
+                return ZoneAttributes.CommercialLightBuilding;
+            case Zone.ZoneType.CommercialMediumBuilding:
+                return ZoneAttributes.CommercialMediumBuilding;
+            case Zone.ZoneType.CommercialHeavyBuilding:
+                return ZoneAttributes.CommercialHeavyBuilding;
+            case Zone.ZoneType.IndustrialLightZoning:
+                return ZoneAttributes.IndustrialLightZoning;
+            case Zone.ZoneType.IndustrialMediumZoning:
+                return ZoneAttributes.IndustrialMediumZoning;
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                return ZoneAttributes.IndustrialHeavyZoning;
+            case Zone.ZoneType.IndustrialLightBuilding:
+                return ZoneAttributes.IndustrialLightBuilding;
+            case Zone.ZoneType.IndustrialMediumBuilding:
+                return ZoneAttributes.IndustrialMediumBuilding;
+            case Zone.ZoneType.IndustrialHeavyBuilding:
+                return ZoneAttributes.IndustrialHeavyBuilding;
             case Zone.ZoneType.Road:
                 return ZoneAttributes.Road;
             case Zone.ZoneType.Grass:
@@ -195,9 +237,24 @@ public class GridManager : MonoBehaviour
     bool IsInRoadDrawingMode()
     {
         return uiManager.GetSelectedZoneType() == Zone.ZoneType.Road ||
-          uiManager.GetSelectedZoneType() == Zone.ZoneType.Residential ||
-          uiManager.GetSelectedZoneType() == Zone.ZoneType.Commercial ||
-          uiManager.GetSelectedZoneType() == Zone.ZoneType.Industrial ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialLightZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialMediumZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialHeavyZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialLightBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialMediumBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.ResidentialHeavyBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialLightZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialMediumZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialHeavyZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialLightBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialMediumBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.CommercialHeavyBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialLightZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialMediumZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialHeavyZoning ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialLightBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialMediumBuilding ||
+          uiManager.GetSelectedZoneType() == Zone.ZoneType.IndustrialHeavyBuilding ||
           uiManager.GetSelectedZoneType() == Zone.ZoneType.Grass ||
           uiManager.GetSelectedBuilding() != null;
     }
@@ -261,6 +318,7 @@ public class GridManager : MonoBehaviour
     {
         Vector2 worldPosition = GetWorldPosition((int)gridPosition.x, (int)gridPosition.y);
         Zone.ZoneType selectedZoneType = uiManager.GetSelectedZoneType();
+
         var zoneAttributes = GetZoneAttributes(selectedZoneType);
 
         if (canPlaceZone(zoneAttributes, gridPosition))
@@ -269,9 +327,15 @@ public class GridManager : MonoBehaviour
 
             destroyCellChildren(cell);
 
-            // Instantiate the new zone tile
+            GameObject zonePrefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
+            
+            if (zonePrefab == null)
+            {
+                return;
+            }
+
             GameObject zoneTile = Instantiate(
-              zoneManager.GetRandomZonePrefab(selectedZoneType),
+              zonePrefab,
               worldPosition,
               Quaternion.identity
             );
@@ -283,12 +347,208 @@ public class GridManager : MonoBehaviour
             // Update other properties if necessary
 
             // Set the sorting order for the isometric grid
-            SetTileSortingOrder(zoneTile);
+            SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
+            sr.sortingOrder = -1000;
+
+            // Set the Zone component
+            addZonedTile(gridPosition, selectedZoneType);
 
             // Update CityStats
             uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
+        }
+        else
+        {
+            Debug.Log("Cannot place zone here.");
+        }
+    }
 
-            cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
+    public void addZonedTile(Vector2 zonedPosition, Zone.ZoneType zoneType)
+    {
+        switch (zoneType)
+        {
+            case Zone.ZoneType.ResidentialLightZoning:
+                zonedResidentialLightPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.ResidentialMediumZoning:
+                zonedResidentialMediumPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                zonedResidentialHeavyPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialLightZoning:
+                zonedCommercialLightPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialMediumZoning:
+                zonedCommercialMediumPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialHeavyZoning:
+                zonedCommercialHeavyPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialLightZoning:
+                zonedIndustrialLightPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialMediumZoning:
+                zonedIndustrialMediumPositions.Add(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                zonedIndustrialHeavyPositions.Add(zonedPosition);
+                break;
+        }
+    }
+
+    private Vector2[] GetZonedPositions(Zone.ZoneType zoneType)
+    {
+        switch (zoneType)
+        {
+            case Zone.ZoneType.ResidentialLightZoning:
+                return zonedResidentialLightPositions.ToArray();
+            case Zone.ZoneType.ResidentialMediumZoning:
+                return zonedResidentialMediumPositions.ToArray();
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                return zonedResidentialHeavyPositions.ToArray();
+            case Zone.ZoneType.CommercialLightZoning:
+                return zonedCommercialLightPositions.ToArray();
+            case Zone.ZoneType.CommercialMediumZoning:
+                return zonedCommercialMediumPositions.ToArray();
+            case Zone.ZoneType.CommercialHeavyZoning:
+                return zonedCommercialHeavyPositions.ToArray();
+            case Zone.ZoneType.IndustrialLightZoning:
+                return zonedIndustrialLightPositions.ToArray();
+            case Zone.ZoneType.IndustrialMediumZoning:
+                return zonedIndustrialMediumPositions.ToArray();
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                return zonedIndustrialHeavyPositions.ToArray();
+            default:
+                return new Vector2[0];
+        }
+    }
+
+    public void PlaceZonedBuildings(Zone.ZoneType zoneType)
+    {
+        if (!cityStats.GetCityPowerAvailability())
+        {
+            return;
+        }
+        
+        Vector2[] zonedPositions = GetZonedPositions(zoneType);
+
+        if (zonedPositions.Length == 0)
+        {
+            return;
+        }
+
+        Vector2 zonedPosition = zonedPositions[Random.Range(0, zonedPositions.Length)];
+
+        Zone.ZoneType buildingZoneType = GetBuildingZoneType(zoneType);
+
+        ZoneAttributes zoneAttributes = GetZoneAttributes(buildingZoneType);
+
+        PlaceZoneBuilding(zonedPosition, buildingZoneType, zoneAttributes);
+    }
+
+    private Zone.ZoneType GetBuildingZoneType(Zone.ZoneType selectedZoneType)
+    {
+        Zone.ZoneType buildingZoneType = Zone.ZoneType.Grass;
+
+        switch (selectedZoneType)
+        {
+            case Zone.ZoneType.ResidentialLightZoning:
+                buildingZoneType = Zone.ZoneType.ResidentialLightBuilding;
+                break;
+            case Zone.ZoneType.ResidentialMediumZoning:
+                buildingZoneType = Zone.ZoneType.ResidentialMediumBuilding;
+                break;
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                buildingZoneType = Zone.ZoneType.ResidentialHeavyBuilding;
+                break;
+            case Zone.ZoneType.CommercialLightZoning:
+                buildingZoneType = Zone.ZoneType.CommercialLightBuilding;
+                break;
+            case Zone.ZoneType.CommercialMediumZoning:
+                buildingZoneType = Zone.ZoneType.CommercialMediumBuilding;
+                break;
+            case Zone.ZoneType.CommercialHeavyZoning:
+                buildingZoneType = Zone.ZoneType.CommercialHeavyBuilding;
+                break;
+            case Zone.ZoneType.IndustrialLightZoning:
+                buildingZoneType = Zone.ZoneType.IndustrialLightBuilding;
+                break;
+            case Zone.ZoneType.IndustrialMediumZoning:
+                buildingZoneType = Zone.ZoneType.IndustrialMediumBuilding;
+                break;
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                buildingZoneType = Zone.ZoneType.IndustrialHeavyBuilding;
+                break;
+        }
+
+        return buildingZoneType;
+    }
+
+    void PlaceZoneBuilding(Vector2 zonedPosition, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes = null)
+    {
+        GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
+        
+        destroyCellChildren(cell);
+
+        Vector3 worldPosition = cell.transform.position;
+
+        GameObject prefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
+
+        if (prefab == null)
+        {
+            return;
+        }
+
+        GameObject zoneTile = Instantiate(
+          prefab,
+          worldPosition,
+          Quaternion.identity
+        );
+        zoneTile.transform.SetParent(cell.transform);
+
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.tileType = (Cell.TileType)selectedZoneType;
+
+        SetTileSortingOrder(zoneTile);
+
+        uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
+
+        cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
+ 
+        removeZonedPositionFromList(zonedPosition, selectedZoneType);
+    }
+
+    void removeZonedPositionFromList(Vector2 zonedPosition, Zone.ZoneType zoneType)
+    {
+        switch (zoneType)
+        {
+            case Zone.ZoneType.ResidentialLightZoning:
+                zonedResidentialLightPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.ResidentialMediumZoning:
+                zonedResidentialMediumPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                zonedResidentialHeavyPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialLightZoning:
+                zonedCommercialLightPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialMediumZoning:
+                zonedCommercialMediumPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.CommercialHeavyZoning:
+                zonedCommercialHeavyPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialLightZoning:
+                zonedIndustrialLightPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialMediumZoning:
+                zonedIndustrialMediumPositions.Remove(zonedPosition);
+                break;
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                zonedIndustrialHeavyPositions.Remove(zonedPosition);
+                break;
         }
     }
 

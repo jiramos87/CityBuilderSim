@@ -7,12 +7,22 @@ public class UIManager : MonoBehaviour
     public CursorManager cursorManager;
     public GridManager gridManager;
 
+    public TimeManager timeManager;
+
+    public EconomyManager economyManager;
+
     public Text populationText;
     public Text moneyText;
     public Text happinessText;
     public Text gridCoordinatesText;
     public Text cityPowerOutputText;
     public Text cityPowerConsumptionText;
+
+    public Text dateText;
+
+    public Text residentialTaxText;
+    public Text commercialTaxText;
+    public Text industrialTaxText;
 
     private Zone.ZoneType selectedZoneType;
 
@@ -42,51 +52,96 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void UpdateUI()
+    public void UpdateUI()
     {
         populationText.text = "Population: " + cityStats.population;
         moneyText.text = "Money: $" + cityStats.money;
         happinessText.text = "Happiness: " + cityStats.happiness;
         cityPowerOutputText.text = "City Power Output: " + cityStats.cityPowerOutput + " MW";
         cityPowerConsumptionText.text = "City Power Consumption: " + cityStats.cityPowerConsumption + " MW";
+        dateText.text = "Date: " + timeManager.GetCurrentDate();
+        residentialTaxText.text = "Residential Tax: " + economyManager.GetResidentialTax() + "%";
+        commercialTaxText.text = "Commercial Tax: " + economyManager.GetCommercialTax() + "%";
+        industrialTaxText.text = "Industrial Tax: " + economyManager.GetIndustrialTax() + "%";
         gridCoordinatesText.text = "Grid Coordinates: " + "x: " + gridManager.mouseGridPosition.x + ", y: " + gridManager.mouseGridPosition.y;
     }
 
     public void OnTileClicked(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
     {
-        if (cityStats.CanAfford(zoneAttributes.ConstructionCost))
-        {
-            cityStats.RemoveMoney(zoneAttributes.ConstructionCost);
-            cityStats.AddPopulation(zoneAttributes.Population);
-            cityStats.AddHappiness(zoneAttributes.Happiness);
-            cityStats.AddZoneCount(zoneType);
-            cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
-        }
-        else
-        {
-            Debug.LogError("Not enough money to place this zone.");
-        }
+        cityStats.RemoveMoney(zoneAttributes.ConstructionCost);
+        cityStats.AddPopulation(zoneAttributes.Population);
+        cityStats.AddHappiness(zoneAttributes.Happiness);
+        cityStats.AddZoneBuildingCount(zoneType);
+        cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
     }
 
-    public void OnResidentialButtonClicked()
+    public void OnLightResidentialButtonClicked()
     {
-        selectedZoneType = Zone.ZoneType.Residential;
+        selectedZoneType = Zone.ZoneType.ResidentialLightZoning;
         cursorManager.SetDefaultCursor();
         bulldozeMode = false;
         ClearSelectedBuilding();
     }
 
-    public void OnCommercialButtonClicked()
+    public void OnMediumResidentialButtonClicked()
     {
-        selectedZoneType = Zone.ZoneType.Commercial;
+        selectedZoneType = Zone.ZoneType.ResidentialMediumZoning;
         cursorManager.SetDefaultCursor();
         bulldozeMode = false;
         ClearSelectedBuilding();
     }
 
-    public void OnIndustrialButtonClicked()
+    public void OnHeavyResidentialButtonClicked()
     {
-        selectedZoneType = Zone.ZoneType.Industrial;
+        selectedZoneType = Zone.ZoneType.ResidentialHeavyZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnLightCommercialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.CommercialLightZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnMediumCommercialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.CommercialMediumZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnHeavyCommercialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.CommercialHeavyZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnLightIndustrialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.IndustrialLightZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnMediumIndustrialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.IndustrialMediumZoning;
+        cursorManager.SetDefaultCursor();
+        bulldozeMode = false;
+        ClearSelectedBuilding();
+    }
+
+    public void OnHeavyIndustrialButtonClicked()
+    {
+        selectedZoneType = Zone.ZoneType.IndustrialHeavyZoning;
         cursorManager.SetDefaultCursor();
         bulldozeMode = false;
         ClearSelectedBuilding();
@@ -121,7 +176,6 @@ public class UIManager : MonoBehaviour
         powerPlant.Initialize("Power Plant A", 10000, 100, 50, 25, 3, 10000, powerPlantAPrefab);
 
         selectedBuilding = powerPlant;
-        Debug.Log("Power Plant A button clicked. Selected building: " + selectedBuilding);
 
         cursorManager.SetDefaultCursor();
         bulldozeMode = false;
@@ -153,11 +207,40 @@ public class UIManager : MonoBehaviour
         ClearSelectedZoneType();
         cursorManager.SetBullDozerCursor();
         bulldozeMode = true;
-        Debug.Log("Bulldoze button clicked. Bulldoze mode: " + bulldozeMode);
     }
 
     public bool isBulldozeMode()
     {
       return bulldozeMode;
+    }
+
+    public void OnRaiseResidentialTaxButtonClicked()
+    {
+        economyManager.RaiseResidentialTax();
+    }
+
+    public void OnLowerResidentialTaxButtonClicked()
+    {
+        economyManager.LowerResidentialTax();
+    }
+
+    public void OnRaiseCommercialTaxButtonClicked()
+    {
+        economyManager.RaiseCommercialTax();
+    }
+
+    public void OnLowerCommercialTaxButtonClicked()
+    {
+        economyManager.LowerCommercialTax();
+    }
+
+    public void OnRaiseIndustrialTaxButtonClicked()
+    {
+        economyManager.RaiseIndustrialTax();
+    }
+
+    public void OnLowerIndustrialTaxButtonClicked()
+    {
+        economyManager.LowerIndustrialTax();
     }
 }

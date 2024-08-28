@@ -20,28 +20,148 @@ public class ZoneAttributes
         PowerConsumption = powerConsumption;
     }
 
-    public static readonly ZoneAttributes Residential = new ZoneAttributes
+    public static readonly ZoneAttributes ResidentialLightZoning = new ZoneAttributes
     (
-        constructionCost: 100,
-        population: 10,
-        happiness: 5,
-        powerConsumption: 100
-    );
-
-    public static readonly ZoneAttributes Commercial = new ZoneAttributes
-    (
-        constructionCost: 200,
-        population: 0,
-        happiness: 10,
-        powerConsumption: 200
-    );
-
-    public static readonly ZoneAttributes Industrial = new ZoneAttributes
-    (
-        constructionCost: 300,
+        constructionCost: 2,
         population: 0,
         happiness: 0,
-        powerConsumption: 300
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes CommercialLightZoning = new ZoneAttributes
+    (
+        constructionCost: 2,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes IndustrialLightZoning = new ZoneAttributes
+    (
+        constructionCost: 2,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes ResidentialMediumZoning = new ZoneAttributes
+    (
+        constructionCost: 4,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes CommercialMediumZoning = new ZoneAttributes
+    (
+        constructionCost: 4,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes IndustrialMediumZoning = new ZoneAttributes
+    (
+        constructionCost: 5,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes ResidentialHeavyZoning = new ZoneAttributes
+    (
+        constructionCost: 6,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes CommercialHeavyZoning = new ZoneAttributes
+    (
+        constructionCost: 7,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes IndustrialHeavyZoning = new ZoneAttributes
+    (
+        constructionCost: 8,
+        population: 0,
+        happiness: 0,
+        powerConsumption: 0
+    );
+
+    public static readonly ZoneAttributes ResidentialLightBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 5,
+        happiness: 5,
+        powerConsumption: 10
+    );
+
+    public static readonly ZoneAttributes CommercialLightBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 10,
+        powerConsumption: 40
+    );
+
+    public static readonly ZoneAttributes IndustrialLightBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 5,
+        powerConsumption: 60
+    );
+
+    public static readonly ZoneAttributes ResidentialMediumBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 20,
+        happiness: 20,
+        powerConsumption: 40
+    );
+
+    public static readonly ZoneAttributes CommercialMediumBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 20,
+        powerConsumption: 80
+    );
+
+    public static readonly ZoneAttributes IndustrialMediumBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 10,
+        powerConsumption: 120
+    );
+
+    public static readonly ZoneAttributes ResidentialHeavyBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 50,
+        happiness: 50,
+        powerConsumption: 80
+    );
+
+    public static readonly ZoneAttributes CommercialHeavyBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 50,
+        powerConsumption: 160
+    );
+
+    public static readonly ZoneAttributes IndustrialHeavyBuilding = new ZoneAttributes
+    (
+        constructionCost: 0,
+        population: 0,
+        happiness: 25,
+        powerConsumption: 240
     );
 
     public static readonly ZoneAttributes Road = new ZoneAttributes
