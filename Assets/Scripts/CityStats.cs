@@ -63,7 +63,9 @@ public class CityStats : MonoBehaviour
 
     public void AddPopulation(int value)
     {
+        Debug.Log("Adding population: " + value + " to " + population);        
         population += value;
+        Debug.Log("Population is now: " + population);
     }
 
     public void AddMoney(int value)
@@ -86,9 +88,19 @@ public class CityStats : MonoBehaviour
         residentialZoneCount++;
     }
 
+    public void RemoveResidentialZoneCount()
+    {
+        residentialZoneCount--;
+    }
+
     public void AddResidentialBuildingCount()
     {
         residentialBuildingCount++;
+    }
+
+    public void RemoveResidentialBuildingCount()
+    {
+        residentialBuildingCount--;
     }
 
     public void AddCommercialZoneCount()
@@ -96,9 +108,19 @@ public class CityStats : MonoBehaviour
         commercialZoneCount++;
     }
 
+    public void RemoveCommercialZoneCount()
+    {
+        commercialZoneCount--;
+    }
+
     public void AddCommercialBuildingCount()
     {
         commercialBuildingCount++;
+    }
+
+    public void RemoveCommercialBuildingCount()
+    {
+        commercialBuildingCount--;
     }
 
     public void AddIndustrialZoneCount()
@@ -106,9 +128,19 @@ public class CityStats : MonoBehaviour
         industrialZoneCount++;
     }
 
+    public void RemoveIndustrialZoneCount()
+    {
+        industrialZoneCount--;
+    }
+
     public void AddIndustrialBuildingCount()
     {
         industrialBuildingCount++;
+    }
+
+    public void RemoveIndustrialBuildingCount()
+    {
+        industrialBuildingCount--;
     }
 
     public void AddResidentialLightBuildingCount()
@@ -117,10 +149,22 @@ public class CityStats : MonoBehaviour
         AddResidentialBuildingCount();
     }
 
+    public void RemoveResidentialLightBuildingCount()
+    {
+        residentialLightBuildingCount--;
+        RemoveResidentialBuildingCount();
+    }
+
     public void AddResidentialLightZoningCount()
     {
         residentialLightZoningCount++;
         AddResidentialZoneCount();
+    }
+
+    public void RemoveResidentialLightZoningCount()
+    {
+        residentialLightZoningCount--;
+        RemoveResidentialZoneCount();
     }
 
     public void AddResidentialMediumBuildingCount()
@@ -129,10 +173,22 @@ public class CityStats : MonoBehaviour
         AddResidentialBuildingCount();
     }
 
+    public void RemoveResidentialMediumBuildingCount()
+    {
+        residentialMediumBuildingCount--;
+        RemoveResidentialBuildingCount();
+    }
+
     public void AddResidentialMediumZoningCount()
     {
         residentialMediumZoningCount++;
         AddResidentialZoneCount();
+    }
+
+    public void RemoveResidentialMediumZoningCount()
+    {
+        residentialMediumZoningCount--;
+        RemoveResidentialZoneCount();
     }
 
     public void AddResidentialHeavyBuildingCount()
@@ -141,10 +197,22 @@ public class CityStats : MonoBehaviour
         AddResidentialBuildingCount();
     }
 
+    public void RemoveResidentialHeavyBuildingCount()
+    {
+        residentialHeavyBuildingCount--;
+        RemoveResidentialBuildingCount();
+    }
+
     public void AddResidentialHeavyZoningCount()
     {
         residentialHeavyZoningCount++;
         AddResidentialZoneCount();
+    }
+
+    public void RemoveResidentialHeavyZoningCount()
+    {
+        residentialHeavyZoningCount--;
+        RemoveResidentialZoneCount();
     }
 
     public void AddCommercialLightBuildingCount()
@@ -153,10 +221,22 @@ public class CityStats : MonoBehaviour
         AddCommercialBuildingCount();
     }
 
+    public void RemoveCommercialLightBuildingCount()
+    {
+        commercialLightBuildingCount--;
+        RemoveCommercialBuildingCount();
+    }
+
     public void AddCommercialLightZoningCount()
     {
         commercialLightZoningCount++;
         AddCommercialZoneCount();
+    }
+
+    public void RemoveCommercialLightZoningCount()
+    {
+        commercialLightZoningCount--;
+        RemoveCommercialZoneCount();
     }
 
     public void AddCommercialMediumBuildingCount()
@@ -165,10 +245,22 @@ public class CityStats : MonoBehaviour
         AddCommercialBuildingCount();
     }
 
+    public void RemoveCommercialMediumBuildingCount()
+    {
+        commercialMediumBuildingCount--;
+        RemoveCommercialBuildingCount();
+    }
+
     public void AddCommercialMediumZoningCount()
     {
         commercialMediumZoningCount++;
         AddCommercialZoneCount();
+    }
+
+    public void RemoveCommercialMediumZoningCount()
+    {
+        commercialMediumZoningCount--;
+        RemoveCommercialZoneCount();
     }
 
     public void AddCommercialHeavyBuildingCount()
@@ -177,10 +269,22 @@ public class CityStats : MonoBehaviour
         AddCommercialBuildingCount();
     }
 
+    public void RemoveCommercialHeavyBuildingCount()
+    {
+        commercialHeavyBuildingCount--;
+        RemoveCommercialBuildingCount();
+    }
+
     public void AddCommercialHeavyZoningCount()
     {
         commercialHeavyZoningCount++;
         AddCommercialZoneCount();
+    }
+
+    public void RemoveCommercialHeavyZoningCount()
+    {
+        commercialHeavyZoningCount--;
+        RemoveCommercialZoneCount();
     }
 
     public void AddIndustrialLightBuildingCount()
@@ -189,10 +293,22 @@ public class CityStats : MonoBehaviour
         AddIndustrialBuildingCount();
     }
 
+    public void RemoveIndustrialLightBuildingCount()
+    {
+        industrialLightBuildingCount--;
+        RemoveIndustrialBuildingCount();
+    }
+
     public void AddIndustrialLightZoningCount()
     {
         industrialLightZoningCount++;
         AddIndustrialZoneCount();
+    }
+
+    public void RemoveIndustrialLightZoningCount()
+    {
+        industrialLightZoningCount--;
+        RemoveIndustrialZoneCount();
     }
 
     public void AddIndustrialMediumBuildingCount()
@@ -201,10 +317,22 @@ public class CityStats : MonoBehaviour
         AddIndustrialBuildingCount();
     }
 
+    public void RemoveIndustrialMediumBuildingCount()
+    {
+        industrialMediumBuildingCount--;
+        RemoveIndustrialBuildingCount();
+    }
+
     public void AddIndustrialMediumZoningCount()
     {
         industrialMediumZoningCount++;
         AddIndustrialZoneCount();
+    }
+
+    public void RemoveIndustrialMediumZoningCount()
+    {
+        industrialMediumZoningCount--;
+        RemoveIndustrialZoneCount();
     }
 
     public void AddIndustrialHeavyBuildingCount()
@@ -213,11 +341,24 @@ public class CityStats : MonoBehaviour
         AddIndustrialBuildingCount();
     }
 
+    public void RemoveIndustrialHeavyBuildingCount()
+    {
+        industrialHeavyBuildingCount--;
+        RemoveIndustrialBuildingCount();
+    }
+
     public void AddIndustrialHeavyZoningCount()
     {
         industrialHeavyZoningCount++;
         AddIndustrialZoneCount();
     }
+
+    public void RemoveIndustrialHeavyZoningCount()
+    {
+        industrialHeavyZoningCount--;
+        RemoveIndustrialZoneCount();
+    }
+
     public void AddRoadCount()
     {
         roadCount++;
@@ -296,6 +437,73 @@ public class CityStats : MonoBehaviour
         }
     }
 
+    public void RemoveZoneBuildingCount(Zone.ZoneType zoneType)
+    {
+        switch (zoneType)
+        {
+            case Zone.ZoneType.ResidentialLightBuilding:
+                RemoveResidentialLightBuildingCount();
+                break;
+            case Zone.ZoneType.ResidentialLightZoning:
+                RemoveResidentialLightZoningCount();
+                break;
+            case Zone.ZoneType.ResidentialMediumBuilding:
+                RemoveResidentialMediumBuildingCount();
+                break;
+            case Zone.ZoneType.ResidentialMediumZoning:
+                RemoveResidentialMediumZoningCount();
+                break;
+            case Zone.ZoneType.ResidentialHeavyBuilding:
+                RemoveResidentialHeavyBuildingCount();
+                break;
+            case Zone.ZoneType.ResidentialHeavyZoning:
+                RemoveResidentialHeavyZoningCount();
+                break;
+            case Zone.ZoneType.CommercialLightBuilding:
+                RemoveCommercialLightBuildingCount();
+                break;
+            case Zone.ZoneType.CommercialLightZoning:
+                RemoveCommercialLightZoningCount();
+                break;
+            case Zone.ZoneType.CommercialMediumBuilding:
+                RemoveCommercialMediumBuildingCount();
+                break;
+            case Zone.ZoneType.CommercialMediumZoning:
+                RemoveCommercialMediumZoningCount();
+                break;
+            case Zone.ZoneType.CommercialHeavyBuilding:
+                RemoveCommercialHeavyBuildingCount();
+                break;
+            case Zone.ZoneType.CommercialHeavyZoning:
+                RemoveCommercialHeavyZoningCount();
+                break;
+            case Zone.ZoneType.IndustrialLightBuilding:
+                RemoveIndustrialLightBuildingCount();
+                break;
+            case Zone.ZoneType.IndustrialLightZoning:
+                RemoveIndustrialLightZoningCount();
+                break;
+            case Zone.ZoneType.IndustrialMediumBuilding:
+                RemoveIndustrialMediumBuildingCount();
+                break;
+            case Zone.ZoneType.IndustrialMediumZoning:
+                RemoveIndustrialMediumZoningCount();
+                break;
+            case Zone.ZoneType.IndustrialHeavyBuilding:
+                RemoveIndustrialHeavyBuildingCount();
+                break;
+            case Zone.ZoneType.IndustrialHeavyZoning:
+                RemoveIndustrialHeavyZoningCount();
+                break;
+            case Zone.ZoneType.Road:
+                roadCount--;
+                break;
+            case Zone.ZoneType.Grass:
+                grassCount--;
+                break;
+        }
+    }
+
     public bool CanAfford(int cost)
     {
         return money >= cost;
@@ -347,5 +555,23 @@ public class CityStats : MonoBehaviour
     public bool GetCityPowerAvailability()
     {
         return cityPowerOutput >= cityPowerConsumption;
+    }
+
+    public void HandleZoneBuildingPlacement(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
+    {
+        RemoveMoney(zoneAttributes.ConstructionCost);
+        AddPopulation(zoneAttributes.Population);
+        AddHappiness(zoneAttributes.Happiness);
+        AddZoneBuildingCount(zoneType);
+        AddPowerConsumption(zoneAttributes.PowerConsumption);
+    }
+
+    public void HandleBuildingDemolition(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
+    {
+        AddMoney(zoneAttributes.ConstructionCost / 5);
+        AddPopulation(-zoneAttributes.Population);
+        AddHappiness(-zoneAttributes.Happiness);
+        RemoveZoneBuildingCount(zoneType);
+        RemovePowerConsumption(zoneAttributes.PowerConsumption);
     }
 }

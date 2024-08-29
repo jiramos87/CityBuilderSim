@@ -194,25 +194,14 @@ public class GridManager : MonoBehaviour
     void HandleBulldozerClick(Vector2 gridPosition)
     {
         GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
-
+        Debug.Log("Bulldozing cell at " + gridPosition + " with child count " + cell.transform.childCount);
         Zone zone = cell.transform.GetChild(0).GetComponent<Zone>();
-
-        IBuilding building = cell.GetComponent<Cell>().occupiedBuilding?.GetComponent<IBuilding>();
-
+        Debug.Log("Bulldozing cell at " + gridPosition + " with zone type " + zone.zoneType);
         HandleBulldozeTile(zone, cell);
     }
 
     void HandleBulldozeTile(Zone zone, GameObject cell)
     {
-        if (cell.transform.childCount > 0)
-        {
-            // Destroy(cell.transform.GetChild(0).gameObject);
-            foreach (Transform child in cell.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-
         Cell cellComponent = cell.GetComponent<Cell>();
         cellComponent.tileType = Cell.TileType.Grass;
 
@@ -222,16 +211,26 @@ public class GridManager : MonoBehaviour
             Quaternion.identity
         );
 
+        Debug.Log("Bulldozing zone type " + zone.zoneType + " at " + cell.transform.position + " with child count " + cell.transform.childCount);
+
+        if (cell.transform.childCount > 0)
+        {
+            // Destroy(cell.transform.GetChild(0).gameObject);
+            foreach (Transform child in cell.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
         zoneTile.transform.SetParent(cell.transform);
 
         SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
 
         sr.sortingOrder = -1001;
 
-        cityStats.AddMoney(25);
-
         ZoneAttributes zoneAttributes = GetZoneAttributes(zone.zoneType);
-        cityStats.RemovePowerConsumption(zoneAttributes.PowerConsumption);
+        Debug.Log("Bulldozing zone type " + zone.zoneType + " with construction cost " + zoneAttributes.ConstructionCost);
+        cityStats.HandleBuildingDemolition(zone.zoneType, zoneAttributes);
     }
 
     bool IsInRoadDrawingMode()
@@ -354,7 +353,7 @@ public class GridManager : MonoBehaviour
             addZonedTile(gridPosition, selectedZoneType);
 
             // Update CityStats
-            uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
+            cityStats.AddZoneBuildingCount(selectedZoneType);
         }
         else
         {
@@ -423,14 +422,14 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void PlaceZonedBuildings(Zone.ZoneType zoneType)
+    public void PlaceZonedBuildings(Zone.ZoneType zoningType)
     {
         if (!cityStats.GetCityPowerAvailability())
         {
             return;
         }
         
-        Vector2[] zonedPositions = GetZonedPositions(zoneType);
+        Vector2[] zonedPositions = GetZonedPositions(zoningType);
 
         if (zonedPositions.Length == 0)
         {
@@ -439,11 +438,11 @@ public class GridManager : MonoBehaviour
 
         Vector2 zonedPosition = zonedPositions[Random.Range(0, zonedPositions.Length)];
 
-        Zone.ZoneType buildingZoneType = GetBuildingZoneType(zoneType);
+        Zone.ZoneType buildingZoneType = GetBuildingZoneType(zoningType);
 
         ZoneAttributes zoneAttributes = GetZoneAttributes(buildingZoneType);
 
-        PlaceZoneBuilding(zonedPosition, buildingZoneType, zoneAttributes);
+        PlaceZoneBuilding(zonedPosition, buildingZoneType, zoneAttributes, zoningType);
     }
 
     private Zone.ZoneType GetBuildingZoneType(Zone.ZoneType selectedZoneType)
@@ -484,7 +483,7 @@ public class GridManager : MonoBehaviour
         return buildingZoneType;
     }
 
-    void PlaceZoneBuilding(Vector2 zonedPosition, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes = null)
+    void PlaceZoneBuilding(Vector2 zonedPosition, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, Zone.ZoneType zoningType)
     {
         GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
         
@@ -511,11 +510,11 @@ public class GridManager : MonoBehaviour
 
         SetTileSortingOrder(zoneTile);
 
-        uiManager.OnTileClicked(selectedZoneType, zoneAttributes);
+        cityStats.HandleZoneBuildingPlacement(selectedZoneType, zoneAttributes);
 
         cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
  
-        removeZonedPositionFromList(zonedPosition, selectedZoneType);
+        removeZonedPositionFromList(zonedPosition, zoningType);
     }
 
     void removeZonedPositionFromList(Vector2 zonedPosition, Zone.ZoneType zoneType)

@@ -204,7 +204,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 76646280}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnRaiseCommercialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &76646280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,8 +372,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -396, y: 18.6}
-  m_SizeDelta: {x: 17.5639, y: 18.0936}
+  m_AnchoredPosition: {x: -395.2092, y: 18.012}
+  m_SizeDelta: {x: 19.1454, y: 19.271}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &157990467
 MonoBehaviour:
@@ -409,7 +421,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnCommercialButtonClicked
+        m_MethodName: OnLightCommercialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -493,8 +505,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -396, y: -4.5}
-  m_SizeDelta: {x: 17.5639, y: 18.0936}
+  m_AnchoredPosition: {x: -395.21, y: -5.3884}
+  m_SizeDelta: {x: 19.145, y: 19.87}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &232444682
 MonoBehaviour:
@@ -542,7 +554,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnCommercialButtonClicked
+        m_MethodName: OnMediumCommercialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1016,7 +1028,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 463531805}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnLowerResidentialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &463531805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1087,12 +1111,18 @@ MonoBehaviour:
   cityStats: {fileID: 890915146}
   cursorManager: {fileID: 2043502343}
   gridManager: {fileID: 1880690381}
+  timeManager: {fileID: 1231479806}
+  economyManager: {fileID: 678270590}
   populationText: {fileID: 261603326}
   moneyText: {fileID: 1746990010}
   happinessText: {fileID: 2092070581}
   gridCoordinatesText: {fileID: 1664159915}
   cityPowerOutputText: {fileID: 1340678635}
   cityPowerConsumptionText: {fileID: 652730768}
+  dateText: {fileID: 1560571897}
+  residentialTaxText: {fileID: 1888940542}
+  commercialTaxText: {fileID: 2053009499}
+  industrialTaxText: {fileID: 1695496943}
   powerPlantAPrefab: {fileID: 1556442157564574698, guid: 7416b6a5e691a4a84b8970470cf93b9a, type: 3}
   bulldozeMode: 0
 --- !u!4 &515320934
@@ -1270,7 +1300,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 607389721}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnRaiseIndustrialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &607389721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1388,6 +1430,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 652730766}
   m_CullTransparentMesh: 1
+--- !u!1 &678270589
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 678270591}
+  - component: {fileID: 678270590}
+  m_Layer: 0
+  m_Name: EconomyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &678270590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678270589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d452a2a97f62b41e4bf613e68ec2bb85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cityStats: {fileID: 890915146}
+  timeManager: {fileID: 1231479806}
+  residentialIncomeTax: 10
+  commercialIncomeTax: 10
+  industrialIncomeTax: 10
+--- !u!4 &678270591
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678270589}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 521.0662, y: 182.06123, z: -4.0976353}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &686057057
 GameObject:
   m_ObjectHideFlags: 0
@@ -1492,8 +1583,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -396, y: -28.8}
-  m_SizeDelta: {x: 17.5639, y: 18.0936}
+  m_AnchoredPosition: {x: -395.6403, y: -29.238}
+  m_SizeDelta: {x: 18.2834, y: 18.97}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &762963515
 MonoBehaviour:
@@ -1541,7 +1632,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnCommercialButtonClicked
+        m_MethodName: OnHeavyCommercialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1732,12 +1823,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598368354321340f58cf301e64d13098, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeManager: {fileID: 0}
   population: 0
   money: 0
   happiness: 0
   residentialZoneCount: 0
+  residentialBuildingCount: 0
   commercialZoneCount: 0
+  commercialBuildingCount: 0
   industrialZoneCount: 0
+  industrialBuildingCount: 0
+  residentialLightBuildingCount: 0
+  residentialLightZoningCount: 0
+  residentialMediumBuildingCount: 0
+  residentialMediumZoningCount: 0
+  residentialHeavyBuildingCount: 0
+  residentialHeavyZoningCount: 0
+  commercialLightBuildingCount: 0
+  commercialLightZoningCount: 0
+  commercialMediumBuildingCount: 0
+  commercialMediumZoningCount: 0
+  commercialHeavyBuildingCount: 0
+  commercialHeavyZoningCount: 0
+  industrialLightBuildingCount: 0
+  industrialLightZoningCount: 0
+  industrialMediumBuildingCount: 0
+  industrialMediumZoningCount: 0
+  industrialHeavyBuildingCount: 0
+  industrialHeavyZoningCount: 0
   roadCount: 0
   grassCount: 0
   cityPowerConsumption: 0
@@ -1838,7 +1951,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 951380460}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnLowerCommercialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &951380460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1906,11 +2031,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82634ec8ec28640809244af8d14bd55e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  residentialPrefabs:
+  lightResidentialBuildingPrefabs:
   - {fileID: 6407699466507457254, guid: 8940a389d4d2c469ba715ad515e5cfe5, type: 3}
-  commercialPrefabs:
+  mediumResidentialBuildingPrefabs: []
+  heavyResidentialBuildingPrefabs: []
+  lightCommercialBuildingPrefabs:
   - {fileID: 3233768041226846146, guid: 427dbf4d65e4d481baa1769afc98c915, type: 3}
-  industrialPrefabs: []
+  mediumCommercialBuildingPrefabs: []
+  heavyCommercialBuildingPrefabs: []
+  lightIndustrialBuildingPrefabs: []
+  mediumIndustrialBuildingPrefabs: []
+  heavyIndustrialBuildingPrefabs: []
+  residentialLightZoningPrefabs:
+  - {fileID: 4362037401182328685, guid: ba7d4c7f0534948b0863c6c34a294f0d, type: 3}
+  residentialMediumZoningPrefabs: []
+  residentialHeavyZoningPrefabs: []
+  commercialLightZoningPrefabs:
+  - {fileID: 6029032110459476766, guid: 9d78f41fc91cd4fa48a8401072c6a4eb, type: 3}
+  commercialMediumZoningPrefabs: []
+  commercialHeavyZoningPrefabs: []
+  industrialLightZoningPrefabs:
+  - {fileID: 8749439238386827594, guid: ba9a6c0ab2c8145f78e0ad8497927a56, type: 3}
+  industrialMediumZoningPrefabs: []
+  industrialHeavyZoningPrefabs: []
   roadPrefabs:
   - {fileID: 9033441826448497700, guid: 514480bdea2914810865b35f2379d48f, type: 3}
   - {fileID: 976403974469465262, guid: 363ff8bd4e9f1407c8a1847092971ee6, type: 3}
@@ -2125,8 +2268,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -346.5, y: -4.2}
-  m_SizeDelta: {x: 18.1838, y: 16.333}
+  m_AnchoredPosition: {x: -346.5, y: -5.5167}
+  m_SizeDelta: {x: 18.184, y: 18.966}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1017322862
 MonoBehaviour:
@@ -2174,7 +2317,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnIndustrialButtonClicked
+        m_MethodName: OnMediumIndustrialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2303,7 +2446,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1019490900}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnRaiseResidentialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1019490900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2584,7 +2739,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnResidentialButtonClicked
+        m_MethodName: OnMediumResidentialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2717,7 +2872,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnResidentialButtonClicked
+        m_MethodName: OnHeavyResidentialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2952,7 +3107,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1225644509}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 515320933}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: OnLowerIndustrialTaxButtonClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1225644509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2991,6 +3158,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1225644506}
   m_CullTransparentMesh: 1
+--- !u!1 &1231479805
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1231479807}
+  - component: {fileID: 1231479806}
+  m_Layer: 0
+  m_Name: TimeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1231479806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231479805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c21da0c962f894242abff124a30ac097, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiManager: {fileID: 515320933}
+  cityStats: {fileID: 890915146}
+  economyManager: {fileID: 678270590}
+  gridManager: {fileID: 1880690381}
+  timeSpeeds:
+  - 0
+  - 1
+  - 2
+  - 4
+  - 8
+--- !u!4 &1231479807
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231479805}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 521.0662, y: 182.06123, z: -4.0976353}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1253988703
 GameObject:
   m_ObjectHideFlags: 0
@@ -3341,8 +3562,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -346.5, y: -4.2}
-  m_SizeDelta: {x: 18.1838, y: 16.333}
+  m_AnchoredPosition: {x: -346.5, y: -29.878}
+  m_SizeDelta: {x: 18.184, y: 17.689}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1435731927
 MonoBehaviour:
@@ -3390,7 +3611,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnIndustrialButtonClicked
+        m_MethodName: OnHeavyIndustrialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3719,8 +3940,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -346.5, y: 18.9}
-  m_SizeDelta: {x: 18.1838, y: 16.333}
+  m_AnchoredPosition: {x: -346.0504, y: 17.721}
+  m_SizeDelta: {x: 19.0831, y: 18.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1601953802
 MonoBehaviour:
@@ -3768,7 +3989,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnIndustrialButtonClicked
+        m_MethodName: OnLightIndustrialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4786,7 +5007,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 515320933}
         m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
-        m_MethodName: OnResidentialButtonClicked
+        m_MethodName: OnLightResidentialButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5085,3 +5306,5 @@ SceneRoots:
   - {fileID: 686057060}
   - {fileID: 515320934}
   - {fileID: 890915147}
+  - {fileID: 1231479807}
+  - {fileID: 678270591}

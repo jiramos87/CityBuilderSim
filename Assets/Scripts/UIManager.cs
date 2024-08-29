@@ -66,15 +66,6 @@ public class UIManager : MonoBehaviour
         gridCoordinatesText.text = "Grid Coordinates: " + "x: " + gridManager.mouseGridPosition.x + ", y: " + gridManager.mouseGridPosition.y;
     }
 
-    public void OnTileClicked(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
-    {
-        cityStats.RemoveMoney(zoneAttributes.ConstructionCost);
-        cityStats.AddPopulation(zoneAttributes.Population);
-        cityStats.AddHappiness(zoneAttributes.Happiness);
-        cityStats.AddZoneBuildingCount(zoneType);
-        cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
-    }
-
     public void OnLightResidentialButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.ResidentialLightZoning;
