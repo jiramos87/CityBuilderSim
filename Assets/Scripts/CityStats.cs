@@ -62,10 +62,8 @@ public class CityStats : MonoBehaviour
     }
 
     public void AddPopulation(int value)
-    {
-        Debug.Log("Adding population: " + value + " to " + population);        
+    {      
         population += value;
-        Debug.Log("Population is now: " + population);
     }
 
     public void AddMoney(int value)

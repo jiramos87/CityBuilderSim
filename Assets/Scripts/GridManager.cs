@@ -194,16 +194,25 @@ public class GridManager : MonoBehaviour
     void HandleBulldozerClick(Vector2 gridPosition)
     {
         GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
-        Debug.Log("Bulldozing cell at " + gridPosition + " with child count " + cell.transform.childCount);
-        Zone zone = cell.transform.GetChild(0).GetComponent<Zone>();
-        Debug.Log("Bulldozing cell at " + gridPosition + " with zone type " + zone.zoneType);
-        HandleBulldozeTile(zone, cell);
+
+        Zone.ZoneType zoneType = cell.GetComponent<Cell>().zoneType;
+
+        HandleBulldozeTile(zoneType, cell);
     }
 
-    void HandleBulldozeTile(Zone zone, GameObject cell)
+    void HandleBulldozeTile(Zone.ZoneType zoneType, GameObject cell)
     {
+        if (cell.transform.childCount > 0)
+        {
+            // Destroy(cell.transform.GetChild(0).gameObject);
+            foreach (Transform child in cell.transform)
+            {
+                DestroyImmediate(child.gameObject);
+            }
+        }
+
         Cell cellComponent = cell.GetComponent<Cell>();
-        cellComponent.tileType = Cell.TileType.Grass;
+        cellComponent.zoneType = Zone.ZoneType.Grass;
 
         GameObject zoneTile = Instantiate(
             zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass),
@@ -211,26 +220,15 @@ public class GridManager : MonoBehaviour
             Quaternion.identity
         );
 
-        Debug.Log("Bulldozing zone type " + zone.zoneType + " at " + cell.transform.position + " with child count " + cell.transform.childCount);
-
-        if (cell.transform.childCount > 0)
-        {
-            // Destroy(cell.transform.GetChild(0).gameObject);
-            foreach (Transform child in cell.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-
         zoneTile.transform.SetParent(cell.transform);
 
         SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
 
         sr.sortingOrder = -1001;
 
-        ZoneAttributes zoneAttributes = GetZoneAttributes(zone.zoneType);
-        Debug.Log("Bulldozing zone type " + zone.zoneType + " with construction cost " + zoneAttributes.ConstructionCost);
-        cityStats.HandleBuildingDemolition(zone.zoneType, zoneAttributes);
+        ZoneAttributes zoneAttributes = GetZoneAttributes(zoneType);
+
+        cityStats.HandleBuildingDemolition(zoneType, zoneAttributes);
     }
 
     bool IsInRoadDrawingMode()
@@ -342,7 +340,7 @@ public class GridManager : MonoBehaviour
 
             // Update the Cell component
             Cell cellComponent = cell.GetComponent<Cell>();
-            cellComponent.tileType = (Cell.TileType)selectedZoneType;
+            cellComponent.zoneType = selectedZoneType;
             // Update other properties if necessary
 
             // Set the sorting order for the isometric grid
@@ -445,52 +443,35 @@ public class GridManager : MonoBehaviour
         PlaceZoneBuilding(zonedPosition, buildingZoneType, zoneAttributes, zoningType);
     }
 
-    private Zone.ZoneType GetBuildingZoneType(Zone.ZoneType selectedZoneType)
+    private Zone.ZoneType GetBuildingZoneType(Zone.ZoneType zoningType)
     {
-        Zone.ZoneType buildingZoneType = Zone.ZoneType.Grass;
-
-        switch (selectedZoneType)
+        switch (zoningType)
         {
             case Zone.ZoneType.ResidentialLightZoning:
-                buildingZoneType = Zone.ZoneType.ResidentialLightBuilding;
-                break;
+                return Zone.ZoneType.ResidentialLightBuilding;
             case Zone.ZoneType.ResidentialMediumZoning:
-                buildingZoneType = Zone.ZoneType.ResidentialMediumBuilding;
-                break;
+                return Zone.ZoneType.ResidentialMediumBuilding;
             case Zone.ZoneType.ResidentialHeavyZoning:
-                buildingZoneType = Zone.ZoneType.ResidentialHeavyBuilding;
-                break;
+                return Zone.ZoneType.ResidentialHeavyBuilding;
             case Zone.ZoneType.CommercialLightZoning:
-                buildingZoneType = Zone.ZoneType.CommercialLightBuilding;
-                break;
+                return Zone.ZoneType.CommercialLightBuilding;
             case Zone.ZoneType.CommercialMediumZoning:
-                buildingZoneType = Zone.ZoneType.CommercialMediumBuilding;
-                break;
+                return Zone.ZoneType.CommercialMediumBuilding;
             case Zone.ZoneType.CommercialHeavyZoning:
-                buildingZoneType = Zone.ZoneType.CommercialHeavyBuilding;
-                break;
+                return Zone.ZoneType.CommercialHeavyBuilding;
             case Zone.ZoneType.IndustrialLightZoning:
-                buildingZoneType = Zone.ZoneType.IndustrialLightBuilding;
-                break;
+                return Zone.ZoneType.IndustrialLightBuilding;
             case Zone.ZoneType.IndustrialMediumZoning:
-                buildingZoneType = Zone.ZoneType.IndustrialMediumBuilding;
-                break;
+                return Zone.ZoneType.IndustrialMediumBuilding;
             case Zone.ZoneType.IndustrialHeavyZoning:
-                buildingZoneType = Zone.ZoneType.IndustrialHeavyBuilding;
-                break;
+                return Zone.ZoneType.IndustrialHeavyBuilding;
+            default:
+                return Zone.ZoneType.Grass;
         }
-
-        return buildingZoneType;
     }
 
     void PlaceZoneBuilding(Vector2 zonedPosition, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, Zone.ZoneType zoningType)
     {
-        GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
-        
-        destroyCellChildren(cell);
-
-        Vector3 worldPosition = cell.transform.position;
-
         GameObject prefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
 
         if (prefab == null)
@@ -498,15 +479,21 @@ public class GridManager : MonoBehaviour
             return;
         }
 
+        GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
+        
+        destroyCellChildren(cell);
+
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.zoneType = selectedZoneType;
+
+        Vector3 worldPosition = cell.transform.position;
+
         GameObject zoneTile = Instantiate(
           prefab,
           worldPosition,
           Quaternion.identity
         );
         zoneTile.transform.SetParent(cell.transform);
-
-        Cell cellComponent = cell.GetComponent<Cell>();
-        cellComponent.tileType = (Cell.TileType)selectedZoneType;
 
         SetTileSortingOrder(zoneTile);
 

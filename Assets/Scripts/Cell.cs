@@ -2,35 +2,20 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    public enum TileType
-    {
-        Grass,
-        Residential,
-        Commercial,
-        Industrial,
-        Road,
-        Water,
-        Power,
-        Fire,
-        Police,
-        Hospital,
-        School,
-        Park
-    }
-
-    public TileType tileType;
     public bool hasRoadAtLeft;
     public bool hasRoadAtTop;
     public bool hasRoadAtRight;
     public bool hasRoadAtBottom;
     public int population;
 
+    public Zone.ZoneType zoneType;
+
     public GameObject occupiedBuilding { get; set; }
 
     void Start()
     {
         // Initialize default values
-        tileType = TileType.Grass;
+        zoneType = Zone.ZoneType.Grass;
         hasRoadAtLeft = false;
         hasRoadAtTop = false;
         hasRoadAtRight = false;
