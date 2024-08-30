@@ -23,7 +23,8 @@ public class Zone : MonoBehaviour
       IndustrialMediumZoning,
       IndustrialHeavyZoning,
       Road,
-      Grass
+      Grass,
+      None
     }
     public ZoneType zoneType;
 

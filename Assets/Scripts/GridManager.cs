@@ -50,6 +50,11 @@ public class GridManager : MonoBehaviour
 
     public Vector2 mouseGridPosition;
 
+    private bool isZoning = false;
+    private Vector2 zoningStartGridPosition;
+    private Vector2 zoningEndGridPosition;
+    private List<GameObject> previewZoningTiles = new List<GameObject>();
+
     void Start()
     {
         CreateGrid();
@@ -271,11 +276,110 @@ public class GridManager : MonoBehaviour
           {
               HandleBuildingPlacement(gridPosition, selectedBuilding);
           }
-          else
+          else if (isInZoningMode())
           {
-              HandleTilePlacement(gridPosition);
+              HandleZoning(mouseGridPosition);
           }
+    }
 
+    private bool isInZoningMode()
+    {
+        return uiManager.GetSelectedZoneType() != Zone.ZoneType.Grass &&
+          uiManager.GetSelectedZoneType() != Zone.ZoneType.Road &&
+          uiManager.GetSelectedZoneType() != Zone.ZoneType.None;
+    }
+
+    void HandleZoning(Vector2 gridPosition)
+    {
+        if (Input.GetMouseButtonDown(0) && !isZoning)
+        {
+            StartZoning(gridPosition);
+        }
+        else if (Input.GetMouseButton(0) && isZoning)
+        {
+            UpdateZoningPreview(gridPosition);
+        }
+        else if (Input.GetMouseButtonUp(0) && isZoning)
+        {
+            PlaceZoning(gridPosition);
+        }
+    }
+
+    void StartZoning(Vector2 gridPosition)
+    {
+        isZoning = true;
+        zoningStartGridPosition = gridPosition;
+        zoningEndGridPosition = gridPosition; // Initialize with the same point
+        ClearPreviewTiles();
+    }
+
+    void UpdateZoningPreview(Vector2 gridPosition)
+    {
+        zoningEndGridPosition = gridPosition;
+        ClearPreviewTiles();
+
+        // Calculate the rectangle corners
+        Vector2Int start = Vector2Int.FloorToInt(zoningStartGridPosition);
+        Vector2Int end = Vector2Int.FloorToInt(zoningEndGridPosition);
+
+        Vector2Int topLeft = new Vector2Int(Mathf.Min(start.x, end.x), Mathf.Max(start.y, end.y));
+        Vector2Int bottomRight = new Vector2Int(Mathf.Max(start.x, end.x), Mathf.Min(start.y, end.y));
+
+        // Draw preview tiles
+        for (int x = topLeft.x; x <= bottomRight.x; x++)
+        {
+            for (int y = bottomRight.y; y <= topLeft.y; y++)
+            {
+                if (canPlaceZone(GetZoneAttributes(uiManager.GetSelectedZoneType()), new Vector2(x, y)))
+                {
+                    Vector2 worldPos = GetWorldPosition(x, y);
+
+                    GameObject zoningPrefab = zoneManager.GetRandomZonePrefab(uiManager.GetSelectedZoneType());
+
+                    GameObject previewZoningTile = Instantiate(
+                      zoningPrefab,
+                      worldPos,
+                      Quaternion.identity
+                    );
+                    previewZoningTile.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f); // Set transparency
+                    previewZoningTiles.Add(previewZoningTile);
+                }
+            }
+        }
+    }
+
+    void PlaceZoning(Vector2 gridPosition)
+    {
+        isZoning = false;
+        ClearPreviewTiles();
+
+        // Calculate the rectangle corners
+        Vector2Int start = Vector2Int.FloorToInt(zoningStartGridPosition);
+        Vector2Int end = Vector2Int.FloorToInt(zoningEndGridPosition);
+
+        Vector2Int topLeft = new Vector2Int(Mathf.Min(start.x, end.x), Mathf.Max(start.y, end.y));
+        Vector2Int bottomRight = new Vector2Int(Mathf.Max(start.x, end.x), Mathf.Min(start.y, end.y));
+
+        // Place definitive zoning tiles
+        for (int x = topLeft.x; x <= bottomRight.x; x++)
+        {
+            for (int y = bottomRight.y; y <= topLeft.y; y++)
+            {
+                if (canPlaceZone(GetZoneAttributes(uiManager.GetSelectedZoneType()), new Vector2(x, y)))
+                {
+                    PlaceZone(new Vector2(x, y));
+                }
+            }
+        }
+    }
+
+    void ClearPreviewTiles()
+    {
+        foreach (var tile in previewZoningTiles)
+        {
+            Destroy(tile);
+        }
+        previewZoningTiles.Clear();
     }
 
     void HandleBuildingPlacement(Vector3 gridPosition, IBuilding selectedBuilding)
@@ -338,19 +442,14 @@ public class GridManager : MonoBehaviour
             );
             zoneTile.transform.SetParent(cell.transform);
 
-            // Update the Cell component
             Cell cellComponent = cell.GetComponent<Cell>();
             cellComponent.zoneType = selectedZoneType;
-            // Update other properties if necessary
 
-            // Set the sorting order for the isometric grid
             SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
             sr.sortingOrder = -1000;
 
-            // Set the Zone component
-            addZonedTile(gridPosition, selectedZoneType);
+            addZonedTileToList(gridPosition, selectedZoneType);
 
-            // Update CityStats
             cityStats.AddZoneBuildingCount(selectedZoneType);
         }
         else
@@ -359,7 +458,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void addZonedTile(Vector2 zonedPosition, Zone.ZoneType zoneType)
+    public void addZonedTileToList(Vector2 zonedPosition, Zone.ZoneType zoneType)
     {
         switch (zoneType)
         {
@@ -763,8 +862,13 @@ public class GridManager : MonoBehaviour
 
         roadTile.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
 
+        Zone.ZoneType zoneType = Zone.ZoneType.Road;
+
         Zone zone = roadTile.AddComponent<Zone>();
-        zone.zoneType = Zone.ZoneType.Road;
+        zone.zoneType = zoneType;
+
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.zoneType = zoneType;
 
         SetSpriteRendererSortingOrder(roadTile, -1000);
 
@@ -1000,7 +1104,9 @@ public class GridManager : MonoBehaviour
             {
                 int gridX = (int)gridPosition.x + x - buildingSize / 2;
                 int gridY = (int)gridPosition.y + y - buildingSize / 2;
-                if (gridArray[gridX, gridY].transform.childCount > 0 && gridArray[gridX, gridY].GetComponent<Cell>().zoneType != Zone.ZoneType.Grass)
+                if (gridArray[gridX, gridY].transform.childCount > 0 &&
+                  gridArray[gridX, gridY].GetComponent<Cell>().zoneType != Zone.ZoneType.Grass
+                )
                 {
                     return false;
                 }
