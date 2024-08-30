@@ -1000,7 +1000,7 @@ public class GridManager : MonoBehaviour
             {
                 int gridX = (int)gridPosition.x + x - buildingSize / 2;
                 int gridY = (int)gridPosition.y + y - buildingSize / 2;
-                if (gridArray[gridX, gridY].transform.childCount > 0 && gridArray[gridX, gridY].transform.GetChild(0).GetComponent<Zone>().zoneType != Zone.ZoneType.Grass)
+                if (gridArray[gridX, gridY].transform.childCount > 0 && gridArray[gridX, gridY].GetComponent<Cell>().zoneType != Zone.ZoneType.Grass)
                 {
                     return false;
                 }
