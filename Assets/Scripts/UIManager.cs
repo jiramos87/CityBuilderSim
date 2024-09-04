@@ -138,7 +138,7 @@ public class UIManager : MonoBehaviour
         ClearSelectedBuilding();
     }
 
-    public void OnRoadButtonClicked()
+    public void OnTwoWayRoadButtonClicked()
     {
         selectedZoneType = Zone.ZoneType.Road;
         // cursorManager.SetRoadCursor();
@@ -156,7 +156,7 @@ public class UIManager : MonoBehaviour
         ClearSelectedBuilding();
     }
 
-    public void OnPowerPlantAButtonClicked()
+    public void OnNuclearPowerPlantButtonClicked()
     {
         ClearSelectedZoneType();
         

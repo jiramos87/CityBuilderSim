@@ -24,9 +24,19 @@ public class Zone : MonoBehaviour
       IndustrialHeavyZoning,
       Road,
       Grass,
-      None
+      None,
+      Building
+    }
+
+    public enum ZoneCategory
+    {
+      Zoning,
+      Road,
+      Grass,
+      Building
     }
     public ZoneType zoneType;
+    public ZoneCategory zoneCategory;
 
     void Start()
     {

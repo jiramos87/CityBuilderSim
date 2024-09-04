@@ -404,13 +404,18 @@ public class GridManager : MonoBehaviour
         return zoneAttributes != null && cityStats.CanAfford(zoneAttributes.ConstructionCost) && canPlaceBuilding(gridPosition, 1);
     }
 
-    void destroyCellChildren(GameObject cell)
+    void destroyCellChildren(GameObject cell, Vector3 gridPosition)
     {
         if (cell.transform.childCount > 0)
         {
             foreach (Transform child in cell.transform)
             {
-                Destroy(child.gameObject);
+                Zone zone = child.GetComponent<Zone>();
+                DestroyImmediate(child.gameObject);
+                if (zone.zoneCategory == Zone.ZoneCategory.Zoning)
+                {
+                    removeZonedPositionFromList(gridPosition, zone.zoneType);
+                }
             }
         }
     }
@@ -426,7 +431,7 @@ public class GridManager : MonoBehaviour
         {
             GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
 
-            destroyCellChildren(cell);
+            destroyCellChildren(cell, gridPosition);
 
             GameObject zonePrefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
             
@@ -441,6 +446,10 @@ public class GridManager : MonoBehaviour
               Quaternion.identity
             );
             zoneTile.transform.SetParent(cell.transform);
+
+            Zone zone = zoneTile.AddComponent<Zone>();
+            zone.zoneType = selectedZoneType;
+            zone.zoneCategory = Zone.ZoneCategory.Zoning;
 
             Cell cellComponent = cell.GetComponent<Cell>();
             cellComponent.zoneType = selectedZoneType;
@@ -580,7 +589,7 @@ public class GridManager : MonoBehaviour
 
         GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
         
-        destroyCellChildren(cell);
+        destroyCellChildren(cell, zonedPosition);
 
         Cell cellComponent = cell.GetComponent<Cell>();
         cellComponent.zoneType = selectedZoneType;
@@ -818,7 +827,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void DestroyPreviousRoadTile(GameObject cell)
+    void DestroyPreviousRoadTile(GameObject cell, Vector2 gridPos)
     {
         if (cell.transform.childCount > 0)
         {
@@ -828,7 +837,10 @@ public class GridManager : MonoBehaviour
                 if (zone != null)
                 {
                     DestroyImmediate(child.gameObject);
-                    continue;
+                    if (zone.zoneCategory == Zone.ZoneCategory.Zoning)
+                    {
+                        removeZonedPositionFromList(gridPos, zone.zoneType);
+                    }
                 }
             }
         }
@@ -852,7 +864,7 @@ public class GridManager : MonoBehaviour
             isPreview
         );
 
-        DestroyPreviousRoadTile(cell);
+        DestroyPreviousRoadTile(cell, gridPos);
 
         GameObject roadTile = Instantiate(
             correctRoadPrefab,
@@ -1141,7 +1153,12 @@ public class GridManager : MonoBehaviour
                     int gridX = (int)gridPos.x + x - buildingSize / 2;
                     int gridY = (int)gridPos.y + y - buildingSize / 2;
 
-                    gridArray[gridX, gridY].GetComponent<Cell>().occupiedBuilding = building;
+                    GameObject gridCell = gridArray[gridX, gridY];
+
+                    Cell cell = gridCell.GetComponent<Cell>();
+
+                    cell.occupiedBuilding = building;
+                    cell.zoneType = Zone.ZoneType.Building;
                 }
             }
         }
