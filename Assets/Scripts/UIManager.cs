@@ -24,6 +24,8 @@ public class UIManager : MonoBehaviour
     public Text commercialTaxText;
     public Text industrialTaxText;
 
+    public Text buttonMoneyText;
+
     private Zone.ZoneType selectedZoneType;
 
     private IBuilding selectedBuilding;
@@ -56,6 +58,7 @@ public class UIManager : MonoBehaviour
     {
         populationText.text = "Population: " + cityStats.population;
         moneyText.text = "Money: $" + cityStats.money;
+        buttonMoneyText.text = "Money: $" + cityStats.money;
         happinessText.text = "Happiness: " + cityStats.happiness;
         cityPowerOutputText.text = "City Power Output: " + cityStats.cityPowerOutput + " MW";
         cityPowerConsumptionText.text = "City Power Consumption: " + cityStats.cityPowerConsumption + " MW";
