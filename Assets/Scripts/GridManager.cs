@@ -13,6 +13,7 @@ public class GridManager : MonoBehaviour
     public UIManager uiManager;
 
     public CityStats cityStats;
+    public CursorManager cursorManager;
 
     public GameObject roadTilePrefab1;
     public GameObject roadTilePrefab2;
@@ -804,7 +805,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    Vector2 GetGridPosition(Vector2 worldPoint)
+    public Vector2 GetGridPosition(Vector2 worldPoint)
     {
         float posX = worldPoint.x / (tileWidth / 2);
         float posY = worldPoint.y / (tileHeight / 2);
@@ -815,7 +816,7 @@ public class GridManager : MonoBehaviour
         return new Vector2(gridX, gridY);
     }
 
-    Vector3 GetWorldPosition(int gridX, int gridY)
+    public Vector2 GetWorldPosition(int gridX, int gridY)
     {
         float posX = (gridX - gridY) * (tileWidth / 2);
         float posY = (gridX + gridY) * (tileHeight / 2);
@@ -1306,6 +1307,8 @@ public class GridManager : MonoBehaviour
         }
         
         UpdateBuildingTilesAttributes(gridPos, building, buildingSize, powerPlant, buildingPrefab);
+
+        cursorManager.RemovePreview(); 
     }
 
     void PlaceBuildingTile(IBuilding iBuilding, Vector2 gridPos)

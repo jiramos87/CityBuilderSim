@@ -183,6 +183,9 @@ public class UIManager : MonoBehaviour
         selectedBuilding = powerPlant;
 
         cursorManager.SetDefaultCursor();
+
+        cursorManager.ShowBuildingPreview(powerPlantAPrefab);
+
         bulldozeMode = false;
     }
 

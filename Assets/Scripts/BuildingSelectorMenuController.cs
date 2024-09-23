@@ -4,12 +4,15 @@ using UnityEngine;
 public class BuildingSelectorMenuController : MonoBehaviour
 {
     public BuildingSelectorMenuManager menuManager;
+    public CursorManager cursorManager;
     public GameObject popupPanel;
 
     public void ShowPopup(List<BuildingSelectorMenuManager.ItemType> items, System.Action<BuildingSelectorMenuManager.ItemType> onItemSelected, string type)
     {
         TogglePopup(type);
         menuManager.PopulateItems(items, onItemSelected, type);
+
+        cursorManager.SetDefaultCursor();
     }
 
     private void TogglePopup(string type)
