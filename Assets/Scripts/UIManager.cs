@@ -255,7 +255,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowTileDetails(Cell cell)
     {
-        Debug.Log("ShowTileDetails");
         detailsPopupController.ShowDetails();
         detailsNameText.text = cell.GetBuildingName();
         detailsOccupancyText.text = "Occupancy: " + cell.GetPopulation();
