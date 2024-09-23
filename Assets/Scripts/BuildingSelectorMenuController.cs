@@ -3,22 +3,46 @@ using UnityEngine;
 
 public class BuildingSelectorMenuController : MonoBehaviour
 {
-    public BuildingSelectorMenuManager menuManager; // Reference to the menu manager
-    public GameObject popupPanel; // Reference to the popup panel
+    public BuildingSelectorMenuManager menuManager;
+    public GameObject popupPanel;
 
-    public void ShowPopup(List<BuildingSelectorMenuManager.ItemType> items, System.Action<BuildingSelectorMenuManager.ItemType> onItemSelected)
+    public void ShowPopup(List<BuildingSelectorMenuManager.ItemType> items, System.Action<BuildingSelectorMenuManager.ItemType> onItemSelected, string type)
     {
-        TogglePopup(true);
-        menuManager.PopulateItems(items, onItemSelected);
+        TogglePopup(type);
+        menuManager.PopulateItems(items, onItemSelected, type);
     }
 
-    public void HidePopup()
+    private void TogglePopup(string type)
     {
-        TogglePopup(false);
+        if (popupPanel.activeSelf)
+        {
+            if (menuManager.GetPopupType() == type)
+            {
+                ClosePopup();
+            }
+            else
+            {
+                OpenPopup();
+            }
+        }
+        else
+        {
+            OpenPopup();
+        }
     }
 
-    private void TogglePopup(bool isVisible)
+    private void OpenPopup()
     {
-        popupPanel.SetActive(isVisible); // Toggle the popup panel visibility
+        popupPanel.SetActive(true);
+    }
+
+    private void ClosePopup()
+    {
+        popupPanel.SetActive(false);
+    }
+
+    public bool IsPopupActive()
+    {
+        return popupPanel.activeSelf;
     }
 }

@@ -9,7 +9,7 @@ public class ResidentialZoningSelectorButton : MonoBehaviour
 
     public void OnResidentialZoningButtonClick()
     {
-        popupController.ShowPopup(residentialZoningItems, OnResidentialZoningTypeSelected);
+        popupController.ShowPopup(residentialZoningItems, OnResidentialZoningTypeSelected, "Residential");
     }
 
     private void OnResidentialZoningTypeSelected(BuildingSelectorMenuManager.ItemType selectedItem)

@@ -9,7 +9,7 @@ public class CommercialZoningSelectorButton : MonoBehaviour
 
     public void OnCommercialZoningButtonClick()
     {
-        popupController.ShowPopup(commercialZoningItems, OnCommercialZoningTypeSelected);
+        popupController.ShowPopup(commercialZoningItems, OnCommercialZoningTypeSelected, "Commercial");
     }
 
     private void OnCommercialZoningTypeSelected(BuildingSelectorMenuManager.ItemType selectedItem)

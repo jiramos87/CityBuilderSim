@@ -33,6 +33,8 @@ public class UIManager : MonoBehaviour
     public Text detailsDateBuiltText;
     public Text detailsBuildingTypeText;
 
+    public Image detailsImage;
+
     private Zone.ZoneType selectedZoneType;
 
     private IBuilding selectedBuilding;
@@ -263,6 +265,7 @@ public class UIManager : MonoBehaviour
         detailsPowerConsumptionText.text = "Power Consumption: " + cell.GetPowerConsumption() + " MW";
         // detailsDateBuiltText.text = "Date Built: " + timeManager.GetCurrentDate();
         detailsBuildingTypeText.text = "Building Type: " + cell.GetBuildingType();
+        detailsImage.sprite = cell.GetCellPrefab().GetComponent<SpriteRenderer>().sprite;
     }
 
     public bool IsDetailsMode()

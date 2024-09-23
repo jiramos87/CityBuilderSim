@@ -8,7 +8,7 @@ public class PowerBuildingsSelectButton : MonoBehaviour
     public UIManager uiManager;
     public void OnPowerBuildingsButtonClick()
     {
-        popupController.ShowPopup(powerBuildingItems, OnPowerBuildingSelected);
+        popupController.ShowPopup(powerBuildingItems, OnPowerBuildingSelected, "Power");
     }
 
     private void OnPowerBuildingSelected(BuildingSelectorMenuManager.ItemType selectedItem)

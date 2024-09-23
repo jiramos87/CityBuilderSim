@@ -9,7 +9,7 @@ public class IndustrialZoningSelectorButton : MonoBehaviour
 
     public void OnIndustrialZoningButtonClick()
     {
-        popupController.ShowPopup(industrialZoningItems, OnIndustrialZoningSelected);
+        popupController.ShowPopup(industrialZoningItems, OnIndustrialZoningSelected, "Industrial");
     }
 
     private void OnIndustrialZoningSelected(BuildingSelectorMenuManager.ItemType selectedItem)

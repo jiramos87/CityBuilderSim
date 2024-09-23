@@ -17,7 +17,9 @@ public class BuildingSelectorMenuManager : MonoBehaviour
     public GameObject itemButtonPrefab;
     public Transform content;
 
-    public void PopulateItems(List<ItemType> itemList, Action<ItemType> onItemSelected)
+    public string populatedWith;
+
+    public void PopulateItems(List<ItemType> itemList, Action<ItemType> onItemSelected, string type)
     {
 
         foreach (Transform child in content)
@@ -29,6 +31,8 @@ public class BuildingSelectorMenuManager : MonoBehaviour
         {
             CreateNewItemButton(item, onItemSelected);
         }
+
+        populatedWith = type;
     }
 
     private void CreateNewItemButton(ItemType item, Action<ItemType> onItemSelected)
@@ -40,5 +44,10 @@ public class BuildingSelectorMenuManager : MonoBehaviour
         newButton.transform.Find("NameText").GetComponent<TextMeshProUGUI>().text = item.name;
 
         newButton.GetComponent<Button>().onClick.AddListener(() => onItemSelected(item));
+    }
+
+    public string GetPopupType()
+    {
+        return populatedWith;
     }
 }

@@ -19,6 +19,7 @@ public class Cell : MonoBehaviour
     public Zone.ZoneType zoneType;
 
     public GameObject occupiedBuilding { get; set; }
+    public GameObject prefab { get; set; }
 
     void Start()
     {
@@ -35,6 +36,7 @@ public class Cell : MonoBehaviour
         buildingType = "";
         buildingSize = 1;
         powerPlant = null;
+        prefab = null;
     }
 
     public string GetBuildingType()
@@ -79,5 +81,10 @@ public class Cell : MonoBehaviour
             return occupiedBuilding.name;
         }
         return "";
+    }
+
+    public GameObject GetCellPrefab()
+    {
+        return prefab;
     }
 }

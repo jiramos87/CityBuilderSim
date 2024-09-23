@@ -81,12 +81,23 @@ public class GridManager : MonoBehaviour
                 cellComponent.x = x;
                 cellComponent.y = y;
                 cellComponent.zoneType = Zone.ZoneType.Grass;
+                cellComponent.population = 0;
+                cellComponent.powerConsumption = 0;
+                cellComponent.powerOutput = 0;
+                cellComponent.happiness = 0;
+                cellComponent.buildingType = null;
+                cellComponent.buildingSize = 1;
+                cellComponent.powerPlant = null;
+
+                GameObject tilePrefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass);
+
+                cellComponent.prefab = tilePrefab;
 
                 gridArray[x, y] = gridCell;
 
                 // Instantiate a random zone tile
                 GameObject zoneTile = Instantiate(
-                    zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass),
+                    tilePrefab,
                     gridCell.transform.position,
                     Quaternion.identity
                 );
@@ -222,6 +233,8 @@ public class GridManager : MonoBehaviour
         cellComponent.powerConsumption = 0;
         cellComponent.happiness = 0;
         cellComponent.zoneType = Zone.ZoneType.Grass;
+        cellComponent.buildingSize = 1;
+        cellComponent.prefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass);
     }
 
     void RestoreTile(GameObject cell)
@@ -496,6 +509,20 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    void UpdatePlacedZoneCellAttributes(GameObject cell, Zone.ZoneType selectedZoneType, GameObject zonePrefab, ZoneAttributes zoneAttributes)
+    {
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.zoneType = selectedZoneType;
+        cellComponent.population = zoneAttributes.Population;
+        cellComponent.powerConsumption = zoneAttributes.PowerConsumption;
+        cellComponent.happiness = zoneAttributes.Happiness;
+        cellComponent.prefab = zonePrefab;
+        cellComponent.buildingType = null;
+        cellComponent.buildingSize = 1;
+        cellComponent.powerPlant = null;
+        cellComponent.occupiedBuilding = null;
+    }
+
     void PlaceZone(Vector3 gridPosition)
     {
         Vector2 worldPosition = GetWorldPosition((int)gridPosition.x, (int)gridPosition.y);
@@ -527,8 +554,7 @@ public class GridManager : MonoBehaviour
             zone.zoneType = selectedZoneType;
             zone.zoneCategory = Zone.ZoneCategory.Zoning;
 
-            Cell cellComponent = cell.GetComponent<Cell>();
-            cellComponent.zoneType = selectedZoneType;
+            UpdatePlacedZoneCellAttributes(cell, selectedZoneType, zonePrefab, zoneAttributes);
 
             SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
             sr.sortingOrder = -1000;
@@ -654,12 +680,14 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void UpdateCellAttributes(Cell cellComponent, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes)
+    void UpdateCellAttributes(Cell cellComponent, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, GameObject prefab)
     {
         cellComponent.zoneType = selectedZoneType;
         cellComponent.population = zoneAttributes.Population;
         cellComponent.powerConsumption = zoneAttributes.PowerConsumption;
         cellComponent.happiness = zoneAttributes.Happiness;
+        cellComponent.prefab = prefab;
+        cellComponent.buildingType = prefab.name;
     }
 
     void PlaceZoneBuildingTile(GameObject prefab, GameObject cell)
@@ -696,7 +724,7 @@ public class GridManager : MonoBehaviour
         
         DestroyCellChildren(cell, zonedPosition);
 
-        UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes);
+        UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes, prefab);
 
         PlaceZoneBuildingTile(prefab, cell);
 
@@ -937,6 +965,18 @@ public class GridManager : MonoBehaviour
         }
     }
 
+    void UpdateRoadCellAttributes(GameObject cell, GameObject roadTile, Zone.ZoneType zoneType)
+    {
+        Cell cellComponent = cell.GetComponent<Cell>();
+        cellComponent.zoneType = zoneType;
+        cellComponent.prefab = roadTile;
+        cellComponent.buildingType = "Road";
+        cellComponent.powerPlant = null;
+        cellComponent.population = 0;
+        cellComponent.powerConsumption = 0;
+        cellComponent.happiness = 0;
+    }
+
     void PlaceRoadTile(Vector2 gridPos, int i = 0, bool isAdjacent = false)
     {
         GameObject cell = gridArray[(int)gridPos.x, (int)gridPos.y];
@@ -970,8 +1010,7 @@ public class GridManager : MonoBehaviour
         Zone zone = roadTile.AddComponent<Zone>();
         zone.zoneType = zoneType;
 
-        Cell cellComponent = cell.GetComponent<Cell>();
-        cellComponent.zoneType = zoneType;
+        UpdateRoadCellAttributes(cell, roadTile, zoneType);
 
         SetSpriteRendererSortingOrder(roadTile, -1000);
 
@@ -1219,12 +1258,13 @@ public class GridManager : MonoBehaviour
         return true;
     }
 
-    void UpdatePlacedBuildingCellAttributes(GameObject gridCell, GameObject building, int buildingSize, PowerPlant powerPlant)
+    void UpdatePlacedBuildingCellAttributes(GameObject gridCell, GameObject building, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab)
     {
         Cell cell = gridCell.GetComponent<Cell>();
 
         cell.occupiedBuilding = building;
         cell.buildingSize = buildingSize;
+        cell.prefab = buildingPrefab;
         cell.zoneType = Zone.ZoneType.Building;
 
         if (powerPlant != null)
@@ -1234,7 +1274,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void UpdateBuildingTilesAttributes(Vector2 gridPos, GameObject building, int buildingSize, PowerPlant powerPlant)
+    void UpdateBuildingTilesAttributes(Vector2 gridPos, GameObject building, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab)
     {
         for (int x = 0; x < buildingSize; x++)
         {
@@ -1245,7 +1285,7 @@ public class GridManager : MonoBehaviour
 
                 GameObject gridCell = gridArray[gridX, gridY];
 
-                UpdatePlacedBuildingCellAttributes(gridCell, building, buildingSize, powerPlant);
+                UpdatePlacedBuildingCellAttributes(gridCell, building, buildingSize, powerPlant, buildingPrefab);
 
                 if (gridX == gridPos.x && gridY == gridPos.y)
                 {
@@ -1255,7 +1295,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void HandleBuildingPlacementAttributesUpdate(IBuilding iBuilding, Vector2 gridPos, GameObject building)
+    void HandleBuildingPlacementAttributesUpdate(IBuilding iBuilding, Vector2 gridPos, GameObject building, GameObject buildingPrefab)
     {
         int buildingSize = iBuilding.BuildingSize;
         PowerPlant powerPlant = iBuilding.GameObjectReference.GetComponent<PowerPlant>();
@@ -1265,7 +1305,7 @@ public class GridManager : MonoBehaviour
             cityStats.RegisterPowerPlant(powerPlant);
         }
         
-        UpdateBuildingTilesAttributes(gridPos, building, buildingSize, powerPlant);
+        UpdateBuildingTilesAttributes(gridPos, building, buildingSize, powerPlant, buildingPrefab);
     }
 
     void PlaceBuildingTile(IBuilding iBuilding, Vector2 gridPos)
@@ -1277,7 +1317,7 @@ public class GridManager : MonoBehaviour
         building.transform.SetParent(gridArray[(int)gridPos.x, (int)gridPos.y].transform);
 
         SetTileSortingOrder(building);
-        HandleBuildingPlacementAttributesUpdate(iBuilding, gridPos, building);
+        HandleBuildingPlacementAttributesUpdate(iBuilding, gridPos, building, buildingPrefab);
     }
 
     void PlaceBuilding(Vector2 gridPos, IBuilding iBuilding)
