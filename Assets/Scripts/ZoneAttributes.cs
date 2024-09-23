@@ -96,7 +96,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 5,
-        happiness: 5,
+        happiness: 100,
         powerConsumption: 10
     );
 
@@ -104,7 +104,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 10,
+        happiness: 100,
         powerConsumption: 40
     );
 
@@ -120,7 +120,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 20,
-        happiness: 20,
+        happiness: 100,
         powerConsumption: 40
     );
 
@@ -128,7 +128,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 20,
+        happiness: 100,
         powerConsumption: 80
     );
 
@@ -136,7 +136,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 10,
+        happiness: 100,
         powerConsumption: 120
     );
 
@@ -144,7 +144,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 50,
-        happiness: 50,
+        happiness: 100,
         powerConsumption: 80
     );
 
@@ -152,7 +152,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 50,
+        happiness: 100,
         powerConsumption: 160
     );
 
@@ -160,7 +160,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 25,
+        happiness: 100,
         powerConsumption: 240
     );
 
@@ -176,7 +176,7 @@ public class ZoneAttributes
     (
         constructionCost: 0,
         population: 0,
-        happiness: 10,
+        happiness: 0,
         powerConsumption: 0
     );
 }

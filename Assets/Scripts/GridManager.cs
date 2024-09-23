@@ -78,6 +78,10 @@ public class GridManager : MonoBehaviour
                 gridCell.transform.SetParent(transform);
 
                 Cell cellComponent = gridCell.AddComponent<Cell>();
+                cellComponent.x = x;
+                cellComponent.y = y;
+                cellComponent.zoneType = Zone.ZoneType.Grass;
+
                 gridArray[x, y] = gridCell;
 
                 // Instantiate a random zone tile
@@ -177,6 +181,12 @@ public class GridManager : MonoBehaviour
                 HandleBulldozerMode(mouseGridPosition);
             }
 
+            if (uiManager.IsDetailsMode() || Input.GetKey(KeyCode.LeftShift))
+            {
+                Debug.Log("Details mode");
+                HandleShowTileDetails(mouseGridPosition);
+            }
+
             if (IsInRoadDrawingMode())
             {
                 HandleRaycast(mouseGridPosition);
@@ -199,25 +209,29 @@ public class GridManager : MonoBehaviour
     void HandleBulldozerClick(Vector2 gridPosition)
     {
         GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
-
         Zone.ZoneType zoneType = cell.GetComponent<Cell>().zoneType;
 
         HandleBulldozeTile(zoneType, cell);
     }
 
-    void HandleBulldozeTile(Zone.ZoneType zoneType, GameObject cell)
+    void BulldozeTile (GameObject cell)
     {
+        Cell cellComponent = cell.GetComponent<Cell>();
+
+        cellComponent.buildingType = null;
+        cellComponent.powerPlant = null;
+        cellComponent.population = 0;
+        cellComponent.powerConsumption = 0;
+        cellComponent.happiness = 0;
+        cellComponent.zoneType = Zone.ZoneType.Grass;
+
         if (cell.transform.childCount > 0)
         {
-            // Destroy(cell.transform.GetChild(0).gameObject);
             foreach (Transform child in cell.transform)
             {
                 DestroyImmediate(child.gameObject);
             }
         }
-
-        Cell cellComponent = cell.GetComponent<Cell>();
-        cellComponent.zoneType = Zone.ZoneType.Grass;
 
         GameObject zoneTile = Instantiate(
             zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass),
@@ -230,10 +244,57 @@ public class GridManager : MonoBehaviour
         SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
 
         sr.sortingOrder = -1001;
+    }
 
-        ZoneAttributes zoneAttributes = GetZoneAttributes(zoneType);
+    void HandleBulldozeTile(Zone.ZoneType zoneType, GameObject cell)
+    {
+        Cell cellComponent = cell.GetComponent<Cell>();
 
-        cityStats.HandleBuildingDemolition(zoneType, zoneAttributes);
+        string buildingType = cellComponent.GetBuildingType();
+
+        if (cellComponent.buildingType == "PowerPlant")
+        {
+            PowerPlant powerPlant = cellComponent.powerPlant;
+            cityStats.UnregisterPowerPlant(powerPlant);
+        }
+
+        if (cellComponent.buildingType == null && zoneType != Zone.ZoneType.Grass)
+        {
+            cityStats.HandleBuildingDemolition(zoneType, GetZoneAttributes(zoneType));
+        }
+
+        int buildingSize = cellComponent.buildingSize;
+
+        if (buildingSize > 1)
+        {
+            for (int x = 0; x < buildingSize; x++)
+            {
+                for (int y = 0; y < buildingSize; y++)
+                {
+                    int gridX = (int)cellComponent.x + x - buildingSize / 2;
+                    int gridY = (int)cellComponent.y + y - buildingSize / 2;
+
+                    GameObject adjacentCell = gridArray[gridX, gridY];
+
+                    BulldozeTile(adjacentCell);
+                }
+            }
+        } else
+        {
+            BulldozeTile(cell);
+        }
+    }
+
+    void HandleShowTileDetails(Vector2 gridPosition)
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Debug.Log("Show tile details at " + gridPosition);
+            GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
+            Cell cellComponent = cell.GetComponent<Cell>();
+            Debug.Log("Cell zone type: " + cellComponent.zoneType);
+            uiManager.ShowTileDetails(cellComponent);
+        }
     }
 
     bool IsInRoadDrawingMode()
@@ -404,18 +465,21 @@ public class GridManager : MonoBehaviour
         return zoneAttributes != null && cityStats.CanAfford(zoneAttributes.ConstructionCost) && canPlaceBuilding(gridPosition, 1);
     }
 
-    void destroyCellChildren(GameObject cell, Vector3 gridPosition)
+    void DestroyCellChildren(GameObject cell, Vector2 gridPosition)
     {
+
         if (cell.transform.childCount > 0)
         {
             foreach (Transform child in cell.transform)
             {
                 Zone zone = child.GetComponent<Zone>();
-                DestroyImmediate(child.gameObject);
-                if (zone.zoneCategory == Zone.ZoneCategory.Zoning)
+
+                if (zone && zone.zoneCategory == Zone.ZoneCategory.Zoning)
                 {
                     removeZonedPositionFromList(gridPosition, zone.zoneType);
                 }
+
+                DestroyImmediate(child.gameObject);
             }
         }
     }
@@ -431,7 +495,7 @@ public class GridManager : MonoBehaviour
         {
             GameObject cell = gridArray[(int)gridPosition.x, (int)gridPosition.y];
 
-            destroyCellChildren(cell, gridPosition);
+            DestroyCellChildren(cell, gridPosition);
 
             GameObject zonePrefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
             
@@ -589,10 +653,13 @@ public class GridManager : MonoBehaviour
 
         GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
         
-        destroyCellChildren(cell, zonedPosition);
+        DestroyCellChildren(cell, zonedPosition);
 
         Cell cellComponent = cell.GetComponent<Cell>();
         cellComponent.zoneType = selectedZoneType;
+        cellComponent.population = zoneAttributes.Population;
+        cellComponent.powerConsumption = zoneAttributes.PowerConsumption;
+        cellComponent.happiness = zoneAttributes.Happiness;
 
         Vector3 worldPosition = cell.transform.position;
 
@@ -1116,6 +1183,7 @@ public class GridManager : MonoBehaviour
             {
                 int gridX = (int)gridPosition.x + x - buildingSize / 2;
                 int gridY = (int)gridPosition.y + y - buildingSize / 2;
+
                 if (gridArray[gridX, gridY].transform.childCount > 0 &&
                   gridArray[gridX, gridY].GetComponent<Cell>().zoneType != Zone.ZoneType.Grass
                 )
@@ -1131,6 +1199,7 @@ public class GridManager : MonoBehaviour
     {
         int buildingSize = iBuilding.BuildingSize;
         GameObject buildingPrefab = iBuilding.Prefab;
+
         Vector2 position = GetWorldPosition((int)gridPos.x, (int)gridPos.y);
 
         if (canPlaceBuilding(gridPos, buildingSize))
@@ -1158,7 +1227,19 @@ public class GridManager : MonoBehaviour
                     Cell cell = gridCell.GetComponent<Cell>();
 
                     cell.occupiedBuilding = building;
+                    cell.buildingSize = buildingSize;
                     cell.zoneType = Zone.ZoneType.Building;
+
+                    if (powerPlant != null)
+                    {
+                        cell.buildingType = "PowerPlant";
+                        cell.powerPlant = powerPlant;
+                    }
+
+                    if (gridX == gridPos.x && gridY == gridPos.y)
+                    {
+                        DestroyCellChildren(gridCell, new Vector2(gridX, gridY));
+                    }
                 }
             }
         }

@@ -9,7 +9,6 @@ public class DataPopupController : MonoBehaviour
 
     public void ShowStats()
     {
-        Debug.Log("Showing stats popup");
         statsPanel.SetActive(true); // Show the stats panel
         taxPanel.SetActive(false); // Hide the tax panel
     }

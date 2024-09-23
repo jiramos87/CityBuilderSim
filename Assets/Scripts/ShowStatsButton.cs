@@ -8,7 +8,6 @@ public class ShowStatsButton : MonoBehaviour
 
   public void OnShowStatsButtonClick()
   {
-    Debug.Log("Show stats button clicked");
     uiManager.UpdateUI();
     popupController.ToggleStats();  
   }

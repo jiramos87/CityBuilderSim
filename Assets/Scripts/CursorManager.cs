@@ -4,6 +4,7 @@ public class CursorManager : MonoBehaviour
 {
     public Texture2D cursorTexture;
     public Texture2D bulldozerTexture;
+    public Texture2D detailsTexture;
     public Vector2 hotSpot;
 
     void Start()
@@ -23,4 +24,11 @@ public class CursorManager : MonoBehaviour
         hotSpot = Vector2.zero;
         Cursor.SetCursor(cursorTexture, hotSpot, CursorMode.Auto);
     }
+
+    public void SetDetailsCursor()
+    {
+        hotSpot = Vector2.zero;
+        Cursor.SetCursor(detailsTexture, hotSpot, CursorMode.Auto);
+    }
+
 }

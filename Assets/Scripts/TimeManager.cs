@@ -101,4 +101,10 @@ public class TimeManager : MonoBehaviour
         currentTimeSpeedIndex = index;
         timeMultiplier = timeSpeeds[currentTimeSpeedIndex];
     }
+
+    public float GetCurrentTimeMultiplier()
+    {
+        return timeMultiplier;
+
+    }
 }

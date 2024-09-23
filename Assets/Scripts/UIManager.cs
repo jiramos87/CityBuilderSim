@@ -25,14 +25,23 @@ public class UIManager : MonoBehaviour
     public Text industrialTaxText;
 
     public Text buttonMoneyText;
+    public Text detailsNameText;
+    public Text detailsOccupancyText;
+    public Text detailsHappinessText;
+    public Text detailsPowerOutputText;
+    public Text detailsPowerConsumptionText;
+    public Text detailsDateBuiltText;
+    public Text detailsBuildingTypeText;
 
     private Zone.ZoneType selectedZoneType;
 
     private IBuilding selectedBuilding;
 
     public GameObject powerPlantAPrefab;
+    public DetailsPopupController detailsPopupController;
 
     public bool bulldozeMode;
+    public bool detailsMode;
 
 
     void Start()
@@ -208,6 +217,12 @@ public class UIManager : MonoBehaviour
       return bulldozeMode;
     }
 
+    public void OnDetailsButtonClicked()
+    {
+        cursorManager.SetDetailsCursor();
+        detailsMode = !detailsMode;
+    }
+
     public void OnRaiseResidentialTaxButtonClicked()
     {
         economyManager.RaiseResidentialTax();
@@ -236,5 +251,23 @@ public class UIManager : MonoBehaviour
     public void OnLowerIndustrialTaxButtonClicked()
     {
         economyManager.LowerIndustrialTax();
+    }
+
+    public void ShowTileDetails(Cell cell)
+    {
+        Debug.Log("ShowTileDetails");
+        detailsPopupController.ShowDetails();
+        detailsNameText.text = cell.GetBuildingName();
+        detailsOccupancyText.text = "Occupancy: " + cell.GetPopulation();
+        detailsHappinessText.text = "Happiness: " + cell.GetHappiness();
+        detailsPowerOutputText.text = "Power Output: " + cell.GetPowerOutput() + " MW";
+        detailsPowerConsumptionText.text = "Power Consumption: " + cell.GetPowerConsumption() + " MW";
+        // detailsDateBuiltText.text = "Date Built: " + timeManager.GetCurrentDate();
+        detailsBuildingTypeText.text = "Building Type: " + cell.GetBuildingType();
+    }
+
+    public bool IsDetailsMode()
+    {
+        return detailsMode;
     }
 }

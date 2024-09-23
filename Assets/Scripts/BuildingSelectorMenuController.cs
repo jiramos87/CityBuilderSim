@@ -8,7 +8,6 @@ public class BuildingSelectorMenuController : MonoBehaviour
 
     public void ShowPopup(List<BuildingSelectorMenuManager.ItemType> items, System.Action<BuildingSelectorMenuManager.ItemType> onItemSelected)
     {
-        Debug.Log("Showing popup + " + items.Count + " items with action: " + onItemSelected.Method.Name);
         TogglePopup(true);
         menuManager.PopulateItems(items, onItemSelected);
     }
@@ -20,7 +19,6 @@ public class BuildingSelectorMenuController : MonoBehaviour
 
     private void TogglePopup(bool isVisible)
     {
-        Debug.Log("Toggling popup visibility: " + isVisible);
         popupPanel.SetActive(isVisible); // Toggle the popup panel visibility
     }
 }

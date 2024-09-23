@@ -520,6 +520,19 @@ public class CityStats : MonoBehaviour
         cityPowerOutput = totalPowerOutput;
     }
 
+    public void UnregisterPowerPlant(PowerPlant powerPlant)
+    {
+        powerPlants.Remove(powerPlant);
+
+        int totalPowerOutput = 0;
+        foreach (var plant in powerPlants)
+        {
+            totalPowerOutput += plant.PowerOutput;
+        }
+
+        cityPowerOutput = totalPowerOutput;
+    }
+
     public int GetTotalPowerOutput()
     {
         return cityPowerOutput;
