@@ -21,6 +21,8 @@ public class PowerPlant : MonoBehaviour, IBuilding
 
     public Building.BuildingType BuildingType { get; private set; }
 
+    private Animator animator;
+
     public void Initialize(string type, int constructionCost, int initialMaintenanceCost, int maxWorkers, int initialWorkers, int size, int baseOutput, GameObject prefab)
     {
         ConstructionCost = constructionCost;
@@ -35,6 +37,14 @@ public class PowerPlant : MonoBehaviour, IBuilding
         SetActive(true);
         SetProductivity(100, false);
         SetWorkers(100);
+
+        animator = GetComponent<Animator>();
+
+        AnimatorManager animatorManager = FindObjectOfType<AnimatorManager>();
+        if (animatorManager != null)
+        {
+            animatorManager.RegisterAnimator(animator);
+        }
     }
 
     public GameObject GameObjectReference => gameObject; 

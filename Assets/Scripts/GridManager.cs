@@ -195,7 +195,6 @@ public class GridManager : MonoBehaviour
 
             if (uiManager.IsDetailsMode() || Input.GetKey(KeyCode.LeftShift))
             {
-                Debug.Log("Details mode");
                 HandleShowTileDetails(mouseGridPosition);
             }
 

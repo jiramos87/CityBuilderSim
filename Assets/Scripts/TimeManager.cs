@@ -7,10 +7,11 @@ public class TimeManager : MonoBehaviour
     public CityStats cityStats;
     public EconomyManager economyManager;
     public GridManager gridManager;
+    public AnimatorManager animatorManager;
     public float[] timeSpeeds = new float[] { 0f, 0.50f, 1.0f, 2.0f, 4.0f };
     private int currentTimeSpeedIndex = 0;
 
-    private float timeMultiplier = 0.5f;
+    private float timeMultiplier = 1f;
     private float timeElapsed = 0f;
     private System.DateTime currentDate;
 
@@ -100,11 +101,11 @@ public class TimeManager : MonoBehaviour
     {
         currentTimeSpeedIndex = index;
         timeMultiplier = timeSpeeds[currentTimeSpeedIndex];
+        animatorManager.SetAnimatorSpeed(timeMultiplier);
     }
 
     public float GetCurrentTimeMultiplier()
     {
         return timeMultiplier;
-
     }
 }

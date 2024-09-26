@@ -827,7 +827,7 @@ MonoBehaviour:
   detailsDateBuiltText: {fileID: 1820852098}
   detailsBuildingTypeText: {fileID: 1743846242}
   detailsImage: {fileID: 406415153}
-  powerPlantAPrefab: {fileID: 1556442157564574698, guid: 7416b6a5e691a4a84b8970470cf93b9a, type: 3}
+  powerPlantAPrefab: {fileID: 5639871321760385905, guid: a465414ff1b1a4fcf9ddeb43da98a8e7, type: 3}
   detailsPopupController: {fileID: 1158038489}
   bulldozeMode: 0
   detailsMode: 0
@@ -2740,6 +2740,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemButtonPrefab: {fileID: 624494626664334750, guid: 096dd929ea7fe42199f037651281ca35, type: 3}
   content: {fileID: 709582275}
+  populatedWith: 
 --- !u!4 &1140593664
 Transform:
   m_ObjectHideFlags: 0
@@ -4109,6 +4110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemButtonPrefab: {fileID: 624494626664334750, guid: 096dd929ea7fe42199f037651281ca35, type: 3}
   content: {fileID: 709582275}
+  populatedWith: 
 --- !u!1 &1713158177
 GameObject:
   m_ObjectHideFlags: 0
@@ -4797,6 +4799,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1838022466}
   m_CullTransparentMesh: 1
+--- !u!1 &1871997439
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1871997441}
+  - component: {fileID: 1871997440}
+  m_Layer: 0
+  m_Name: AnimatorManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1871997440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871997439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f98202f1b93540d2ad185181983cb60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeManager: {fileID: 1231479806}
+--- !u!4 &1871997441
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871997439}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 922.14685, y: 395.9985, z: 1.9347247}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1880690380
 GameObject:
   m_ObjectHideFlags: 0
@@ -4833,6 +4880,7 @@ MonoBehaviour:
   zoneManager: {fileID: 955926519}
   uiManager: {fileID: 515320933}
   cityStats: {fileID: 890915146}
+  cursorManager: {fileID: 2043502343}
   roadTilePrefab1: {fileID: 985362822682053019, guid: f352b1a1987d5475fb6ca00d317d21da, type: 3}
   roadTilePrefab2: {fileID: 6344670689893122505, guid: 720adb93575224a59a2e816ea22172de, type: 3}
   roadTilePrefabCrossing: {fileID: 8867849998717431026, guid: 75e085f481fbc4cb9b4a7bb52f75ccf1, type: 3}
@@ -5054,6 +5102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   menuManager: {fileID: 1140593663}
+  cursorManager: {fileID: 2043502343}
   popupPanel: {fileID: 1710728774}
 --- !u!4 &1975260510
 Transform:
@@ -5103,6 +5152,7 @@ MonoBehaviour:
   bulldozerTexture: {fileID: 2800000, guid: 86facc3aeb3f249ac86535afa0beb740, type: 3}
   detailsTexture: {fileID: 0}
   hotSpot: {x: 0, y: 0}
+  gridManager: {fileID: 1880690381}
 --- !u!4 &2043502344
 Transform:
   m_ObjectHideFlags: 0
@@ -5630,3 +5680,4 @@ SceneRoots:
   - {fileID: 1975260510}
   - {fileID: 1421362055}
   - {fileID: 1158038490}
+  - {fileID: 1871997441}
