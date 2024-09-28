@@ -45,6 +45,9 @@ public class UIManager : MonoBehaviour
     public bool bulldozeMode;
     public bool detailsMode;
 
+    public GameManager gameManager;
+
+    public string saveName;
 
     void Start()
     {
@@ -274,5 +277,15 @@ public class UIManager : MonoBehaviour
     public bool IsDetailsMode()
     {
         return detailsMode;
+    }
+
+    public void OnSaveGameButtonClicked()
+    {
+        gameManager.SaveGame(saveName);
+    }
+
+    public void OnLoadGameButtonClicked(string saveFilePath)
+    {
+        gameManager.LoadGame(saveFilePath);
     }
 }

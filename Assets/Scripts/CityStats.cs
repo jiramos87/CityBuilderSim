@@ -48,6 +48,8 @@ public class CityStats : MonoBehaviour
 
     private List<PowerPlant> powerPlants = new List<PowerPlant>();
 
+    public string cityName;
+
     void Start()
     {
         population = 0;
@@ -59,6 +61,7 @@ public class CityStats : MonoBehaviour
         grassCount = 0;
         cityPowerConsumption = 0;
         cityPowerOutput = 0;
+        cityName = "City";
     }
 
     public void AddPopulation(int value)
@@ -565,7 +568,7 @@ public class CityStats : MonoBehaviour
 
     public bool GetCityPowerAvailability()
     {
-        return cityPowerOutput >= cityPowerConsumption;
+        return cityPowerOutput > cityPowerConsumption;
     }
 
     public void HandleZoneBuildingPlacement(Zone.ZoneType zoneType, ZoneAttributes zoneAttributes)
@@ -585,4 +588,84 @@ public class CityStats : MonoBehaviour
         RemoveZoneBuildingCount(zoneType);
         RemovePowerConsumption(zoneAttributes.PowerConsumption);
     }
+
+    public CityStatsData GetCityStatsData()
+    {
+        CityStatsData cityStatsData = new CityStatsData
+        {
+            currentDate = currentDate,
+            population = population,
+            money = money,
+            happiness = happiness,
+            residentialZoneCount = residentialZoneCount,
+            residentialBuildingCount = residentialBuildingCount,
+            commercialZoneCount = commercialZoneCount,
+            commercialBuildingCount = commercialBuildingCount,
+            industrialZoneCount = industrialZoneCount,
+            industrialBuildingCount = industrialBuildingCount,
+            residentialLightBuildingCount = residentialLightBuildingCount,
+            residentialLightZoningCount = residentialLightZoningCount,
+            residentialMediumBuildingCount = residentialMediumBuildingCount,
+            residentialMediumZoningCount = residentialMediumZoningCount,
+            residentialHeavyBuildingCount = residentialHeavyBuildingCount,
+            residentialHeavyZoningCount = residentialHeavyZoningCount,
+            commercialLightBuildingCount = commercialLightBuildingCount,
+            commercialLightZoningCount = commercialLightZoningCount,
+            commercialMediumBuildingCount = commercialMediumBuildingCount,
+            commercialMediumZoningCount = commercialMediumZoningCount,
+            commercialHeavyBuildingCount = commercialHeavyBuildingCount,
+            commercialHeavyZoningCount = commercialHeavyZoningCount,
+            industrialLightBuildingCount = industrialLightBuildingCount,
+            industrialLightZoningCount = industrialLightZoningCount,
+            industrialMediumBuildingCount = industrialMediumBuildingCount,
+            industrialMediumZoningCount = industrialMediumZoningCount,
+            industrialHeavyBuildingCount = industrialHeavyBuildingCount,
+            industrialHeavyZoningCount = industrialHeavyZoningCount,
+            roadCount = roadCount,
+            grassCount = grassCount,
+            cityPowerConsumption = cityPowerConsumption,
+            cityPowerOutput = cityPowerOutput,
+            cityName = cityName
+        };
+
+        return cityStatsData;
+    }
+}
+
+[System.Serializable]
+public struct CityStatsData
+{
+    public System.DateTime currentDate;
+    public int population;
+    public int money;
+    public int happiness;
+    public int residentialZoneCount;
+    public int residentialBuildingCount;
+    public int commercialZoneCount;
+    public int commercialBuildingCount;
+    public int industrialZoneCount;
+    public int industrialBuildingCount;
+    public int residentialLightBuildingCount;
+    public int residentialLightZoningCount;
+    public int residentialMediumBuildingCount;
+    public int residentialMediumZoningCount;
+    public int residentialHeavyBuildingCount;
+    public int residentialHeavyZoningCount;
+    public int commercialLightBuildingCount;
+    public int commercialLightZoningCount;
+    public int commercialMediumBuildingCount;
+    public int commercialMediumZoningCount;
+    public int commercialHeavyBuildingCount;
+    public int commercialHeavyZoningCount;
+    public int industrialLightBuildingCount;
+    public int industrialLightZoningCount;
+    public int industrialMediumBuildingCount;
+    public int industrialMediumZoningCount;
+    public int industrialHeavyBuildingCount;
+    public int industrialHeavyZoningCount;
+    public int roadCount;
+    public int grassCount;
+    public int cityPowerConsumption;
+    public int cityPowerOutput;
+    public string cityName;
 }

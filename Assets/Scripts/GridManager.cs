@@ -1,6 +1,8 @@
+using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using System;
 
 public class GridManager : MonoBehaviour
 {
@@ -55,6 +57,8 @@ public class GridManager : MonoBehaviour
     private Vector2 zoningStartGridPosition;
     private Vector2 zoningEndGridPosition;
     private List<GameObject> previewZoningTiles = new List<GameObject>();
+    private Dictionary<Zone.ZoneType, List<List<Vector2>>> availableZoneSections =
+      new Dictionary<Zone.ZoneType, List<List<Vector2>>>(); // Dictionary to store available zone sections
 
     void Start()
     {
@@ -90,9 +94,10 @@ public class GridManager : MonoBehaviour
                 cellComponent.buildingSize = 1;
                 cellComponent.powerPlant = null;
 
-                GameObject tilePrefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass);
+                GameObject tilePrefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass, 1);
 
                 cellComponent.prefab = tilePrefab;
+                cellComponent.prefabName = tilePrefab.name;
 
                 gridArray[x, y] = gridCell;
 
@@ -235,6 +240,7 @@ public class GridManager : MonoBehaviour
         cellComponent.zoneType = Zone.ZoneType.Grass;
         cellComponent.buildingSize = 1;
         cellComponent.prefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass);
+        cellComponent.prefabName = cellComponent.prefab.name;
     }
 
     void RestoreTile(GameObject cell)
@@ -457,6 +463,8 @@ public class GridManager : MonoBehaviour
                 }
             }
         }
+
+        CalculateAvailableSquareZonedSections();
     }
 
     void ClearPreviewTiles()
@@ -517,6 +525,7 @@ public class GridManager : MonoBehaviour
         cellComponent.powerConsumption = zoneAttributes.PowerConsumption;
         cellComponent.happiness = zoneAttributes.Happiness;
         cellComponent.prefab = zonePrefab;
+        cellComponent.prefabName = zonePrefab.name;
         cellComponent.buildingType = null;
         cellComponent.buildingSize = 1;
         cellComponent.powerPlant = null;
@@ -636,21 +645,27 @@ public class GridManager : MonoBehaviour
         {
             return;
         }
-        
-        Vector2[] zonedPositions = GetZonedPositions(zoningType);
 
-        if (zonedPositions.Length == 0)
+        if (availableZoneSections.Count == 0)
         {
             return;
         }
 
-        Vector2 zonedPosition = zonedPositions[Random.Range(0, zonedPositions.Length)];
+        var sectionResult = GetRandomAvailableSection(zoningType);
+
+        if (!sectionResult.HasValue || sectionResult.Value.size == 0)
+        {
+            return;
+        }
+        
+        int buildingSize = sectionResult.Value.size;
+        Vector2[] section = sectionResult.Value.section;
 
         Zone.ZoneType buildingZoneType = GetBuildingZoneType(zoningType);
 
         ZoneAttributes zoneAttributes = GetZoneAttributes(buildingZoneType);
 
-        PlaceZoneBuilding(zonedPosition, buildingZoneType, zoneAttributes, zoningType);
+        PlaceZoneBuilding(section, buildingZoneType, zoneAttributes, zoningType, buildingSize);
     }
 
     private Zone.ZoneType GetBuildingZoneType(Zone.ZoneType zoningType)
@@ -687,13 +702,20 @@ public class GridManager : MonoBehaviour
         cellComponent.powerConsumption = zoneAttributes.PowerConsumption;
         cellComponent.happiness = zoneAttributes.Happiness;
         cellComponent.prefab = prefab;
+        cellComponent.prefabName = prefab.name;
         cellComponent.buildingType = prefab.name;
     }
 
-    void PlaceZoneBuildingTile(GameObject prefab, GameObject cell)
+    void PlaceZoneBuildingTile(GameObject prefab, GameObject cell, int buildingSize = 1)
     {
         Vector3 worldPosition = cell.transform.position;
 
+        if (buildingSize > 1)
+        {
+          Vector3 offset = new Vector3(0, -(buildingSize - 1) * tileHeight / 2, 0);
+          worldPosition -= offset;
+        }
+        
         GameObject zoneTile = Instantiate(
           prefab,
           worldPosition,
@@ -711,26 +733,48 @@ public class GridManager : MonoBehaviour
         cityStats.AddPowerConsumption(zoneAttributes.PowerConsumption);
     }
 
-    void PlaceZoneBuilding(Vector2 zonedPosition, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, Zone.ZoneType zoningType)
+    void PlaceZoneBuilding(Vector2[] section, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, Zone.ZoneType zoningType, int buildingSize)
     {
-        GameObject prefab = zoneManager.GetRandomZonePrefab(selectedZoneType);
+        GameObject prefab = zoneManager.GetRandomZonePrefab(selectedZoneType, buildingSize);
 
         if (prefab == null)
         {
             return;
         }
 
-        GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
-        
-        DestroyCellChildren(cell, zonedPosition);
+        foreach (Vector2 zonedPosition in section)
+        {
+            GameObject cell = gridArray[(int)zonedPosition.x, (int)zonedPosition.y];
 
-        UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes, prefab);
+            DestroyCellChildren(cell, zonedPosition);
 
-        PlaceZoneBuildingTile(prefab, cell);
+            UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes, prefab);
+
+            removeZonedPositionFromList(zonedPosition, zoningType);
+        }
+
+        Vector2 firstPosition = section[0];
+        PlaceZoneBuildingTile(prefab, gridArray[(int)firstPosition.x, (int)firstPosition.y], buildingSize);
 
         UpdateZonedBuildingPlacementStats(selectedZoneType, zoneAttributes);
- 
-        removeZonedPositionFromList(zonedPosition, zoningType);
+        RemoveZonedSectionFromList(section, zoningType);
+    }
+
+    private Vector2 FindCenterPosition(Vector2[] section)
+    {
+        float x = 0;
+        float y = 0;
+
+        foreach (Vector2 position in section)
+        {
+            x += position.x;
+            y += position.y;
+        }
+
+        x /= section.Length;
+        y /= section.Length;
+
+        return new Vector2(x, y);
     }
 
     void removeZonedPositionFromList(Vector2 zonedPosition, Zone.ZoneType zoneType)
@@ -764,6 +808,18 @@ public class GridManager : MonoBehaviour
             case Zone.ZoneType.IndustrialHeavyZoning:
                 zonedIndustrialHeavyPositions.Remove(zonedPosition);
                 break;
+        }
+    }
+
+    void RemoveZonedSectionFromList(Vector2[] zonedPositions, Zone.ZoneType zoneType)
+    {
+        if (availableZoneSections.ContainsKey(zoneType))
+        {
+            var sectionToRemove = availableZoneSections[zoneType].FirstOrDefault(section => section.SequenceEqual(zonedPositions));
+            if (sectionToRemove != null)
+            {
+                availableZoneSections[zoneType].Remove(sectionToRemove);
+            }
         }
     }
 
@@ -970,6 +1026,7 @@ public class GridManager : MonoBehaviour
         Cell cellComponent = cell.GetComponent<Cell>();
         cellComponent.zoneType = zoneType;
         cellComponent.prefab = roadTile;
+        cellComponent.prefabName = roadTile.name;
         cellComponent.buildingType = "Road";
         cellComponent.powerPlant = null;
         cellComponent.population = 0;
@@ -1265,6 +1322,7 @@ public class GridManager : MonoBehaviour
         cell.occupiedBuilding = building;
         cell.buildingSize = buildingSize;
         cell.prefab = buildingPrefab;
+        cell.prefabName = buildingPrefab.name;
         cell.zoneType = Zone.ZoneType.Building;
 
         if (powerPlant != null)
@@ -1331,6 +1389,159 @@ public class GridManager : MonoBehaviour
         else
         {
             Debug.Log("Cannot place building here, area is not available.");
+        }
+    }
+
+    private Vector2[] GetRandomAvailableSizeSection(Zone.ZoneType zoneType, int buildingSize)
+    {
+        if (availableZoneSections.ContainsKey(zoneType) && availableZoneSections[zoneType].Count > 0)
+        {
+            // Find sections that fit the building size
+            var possibleSections = availableZoneSections[zoneType].Where(section => buildingSize * buildingSize <= section.Count).ToList();
+
+            if (possibleSections.Count > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, possibleSections.Count);
+
+                return possibleSections[randomIndex].ToArray();
+            }
+        }
+        return null;
+    }
+
+    private (int size, Vector2[] section)? GetRandomAvailableSection(Zone.ZoneType zoneType)
+    {
+        Dictionary<int, Vector2[]> availableSections = new Dictionary<int, Vector2[]>();
+
+        for (int i = 1; i <= 3; i++)
+        {
+            Vector2[] section = GetRandomAvailableSizeSection(zoneType, i);
+
+            if (section != null && section.Length > 0)
+            {
+                availableSections.Add(i, section);
+            }
+        }
+
+        if (availableSections.Count > 0)
+        {
+            int randomSize = availableSections.Keys.ElementAt(UnityEngine.Random.Range(0, availableSections.Keys.Count));
+
+            return (randomSize, availableSections[randomSize]);
+        }
+
+        return (0, null);
+    }
+
+    public void CalculateAvailableSquareZonedSections()
+    {
+        availableZoneSections.Clear();
+
+        foreach (Zone.ZoneType zoneType in Enum.GetValues(typeof(Zone.ZoneType)))
+        {
+            if (zoneType == Zone.ZoneType.None || zoneType == Zone.ZoneType.Road || zoneType == Zone.ZoneType.Building ||
+                zoneType == Zone.ZoneType.ResidentialLightBuilding || zoneType == Zone.ZoneType.ResidentialMediumBuilding ||
+                zoneType == Zone.ZoneType.ResidentialHeavyBuilding || zoneType == Zone.ZoneType.CommercialLightBuilding ||
+                zoneType == Zone.ZoneType.CommercialMediumBuilding || zoneType == Zone.ZoneType.CommercialHeavyBuilding ||
+                zoneType == Zone.ZoneType.IndustrialLightBuilding || zoneType == Zone.ZoneType.IndustrialMediumBuilding ||
+                zoneType == Zone.ZoneType.IndustrialHeavyBuilding)
+            {
+                continue;
+            }
+
+            List<List<Vector2>> sections = new List<List<Vector2>>();
+
+
+            for (int size = 1; size <= 3; size++)
+            {
+                List<Vector2> zonedPositions = GetZonedPositions(zoneType).ToList();
+
+                if (zonedPositions.Count == 0)
+                {
+                    continue;
+                }
+
+                for (int i = zonedPositions.Count - 1; i >= 0; i--)
+                {
+                    Debug.Log("CalculateAvailableSquareZonedSections for i: " + i + " zonedPositions[i]: " + zonedPositions[i] + " for zoneType: " + zoneType);
+                    Vector2 start = zonedPositions[i];
+
+                    List<Vector2> section = GetSquareSection(start, size, zonedPositions);
+
+                    if (section.Count == size * size)
+                    {
+                        sections.Add(section);
+
+                        foreach (var pos in section)
+                        {
+                            zonedPositions.Remove(pos);
+                        }
+                    }
+                }
+            }
+
+            availableZoneSections.Add(zoneType, sections);
+        }
+    }
+
+// Helper method to get square sections of a given size
+    private List<Vector2> GetSquareSection(Vector2 start, int size, List<Vector2> availablePositions)
+    {
+        List<Vector2> section = new List<Vector2>();
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                Vector2 newPosition = new Vector2(start.x + x, start.y + y);
+                if (availablePositions.Contains(newPosition))
+                {
+                    section.Add(newPosition);
+                }
+            }
+        }
+
+        return section;
+    }
+
+    public List<CellData> GetGridData()
+    {
+        List<CellData> gridData = new List<CellData>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GameObject cell = gridArray[x, y];
+                Cell cellComponent = cell.GetComponent<Cell>();
+
+                CellData cellData = cellComponent.GetCellData();
+
+                gridData.Add(cellData);
+            }
+        }
+
+        return gridData;
+    }
+
+    void RestoreGridCell(CellData cellData, GameObject cell)
+    {
+        cell.GetComponent<Cell>().SetCellData(cellData);
+
+        GameObject tilePrefab = zoneManager.FindPrefabByName(cellData.prefabName);
+        if (tilePrefab != null)
+        {
+            PlaceZoneBuildingTile(tilePrefab, cell, cellData.buildingSize);
+        }
+    }
+
+    public void RestoreGrid(List<CellData> gridData)
+    {
+        foreach (CellData cellData in gridData)
+        {
+            GameObject cell = gridArray[cellData.x, cellData.y];
+
+            RestoreGridCell(cellData, cell);
         }
     }
 }

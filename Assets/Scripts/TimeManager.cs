@@ -33,6 +33,7 @@ public class TimeManager : MonoBehaviour
             timeElapsed = 0f;
 
             // cityStats.PerformDailyUpdates();
+            gridManager.CalculateAvailableSquareZonedSections();
             PlaceAllZonedBuildings();
 
             if (currentDate.Day == 1)
@@ -108,4 +109,21 @@ public class TimeManager : MonoBehaviour
     {
         return timeMultiplier;
     }
+
+    public InGameTime GetCurrentInGameTime()
+    {
+        InGameTime inGameTime = new InGameTime();
+        inGameTime.day = currentDate.Day;
+        inGameTime.month = currentDate.Month;
+        inGameTime.year = currentDate.Year;
+        return inGameTime;
+    }
+}
+
+[System.Serializable]
+public struct InGameTime
+{
+    public int day;
+    public int month;
+    public int year;
 }

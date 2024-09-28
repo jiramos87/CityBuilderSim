@@ -14,6 +14,7 @@ public class Cell : MonoBehaviour
     public int x;
     public int y;
     public int happiness;
+    public string prefabName;
     public PowerPlant powerPlant { get; set; }
 
     public Zone.ZoneType zoneType;
@@ -21,8 +22,12 @@ public class Cell : MonoBehaviour
     public GameObject occupiedBuilding { get; set; }
     public GameObject prefab { get; set; }
 
+    private string occupiedBuildingName;
+
     void Start()
     {
+        ZoneManager zoneManager = FindObjectOfType<ZoneManager>();
+        GameObject grassPrefab = zoneManager.GetGrassPrefab();
         // Initialize default values
         zoneType = Zone.ZoneType.Grass;
         hasRoadAtLeft = false;
@@ -33,10 +38,12 @@ public class Cell : MonoBehaviour
         powerOutput = 0;
         powerConsumption = 0;
         happiness = 0;
-        buildingType = "";
+        buildingType = "Grass";
         buildingSize = 1;
         powerPlant = null;
-        prefab = null;
+        prefab = grassPrefab;
+        prefabName = grassPrefab.name;
+        occupiedBuildingName = "";
     }
 
     public string GetBuildingType()
@@ -86,5 +93,48 @@ public class Cell : MonoBehaviour
     public GameObject GetCellPrefab()
     {
         return prefab;
+    }
+
+    public CellData GetCellData()
+    {
+        CellData cellData = new CellData
+        {
+            hasRoadAtLeft = hasRoadAtLeft,
+            hasRoadAtTop = hasRoadAtTop,
+            hasRoadAtRight = hasRoadAtRight,
+            hasRoadAtBottom = hasRoadAtBottom,
+            population = population,
+            powerOutput = powerOutput,
+            powerConsumption = powerConsumption,
+            buildingType = buildingType,
+            buildingSize = buildingSize,
+            x = x,
+            y = y,
+            happiness = happiness,
+            prefabName = prefabName,
+            zoneType = zoneType.ToString(),
+            occupiedBuildingName = occupiedBuilding != null ? occupiedBuilding.name : "" // Check for null
+        };
+
+        return cellData;
+    }
+
+    public void SetCellData(CellData cellData)
+    {
+        hasRoadAtLeft = cellData.hasRoadAtLeft;
+        hasRoadAtTop = cellData.hasRoadAtTop;
+        hasRoadAtRight = cellData.hasRoadAtRight;
+        hasRoadAtBottom = cellData.hasRoadAtBottom;
+        population = cellData.population;
+        powerOutput = cellData.powerOutput;
+        powerConsumption = cellData.powerConsumption;
+        buildingType = cellData.buildingType;
+        buildingSize = cellData.buildingSize;
+        x = cellData.x;
+        y = cellData.y;
+        happiness = cellData.happiness;
+        prefabName = cellData.prefabName;
+        zoneType = (Zone.ZoneType)System.Enum.Parse(typeof(Zone.ZoneType), cellData.zoneType);
+        occupiedBuildingName = cellData.occupiedBuildingName;
     }
 }
