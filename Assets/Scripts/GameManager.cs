@@ -26,4 +26,9 @@ public class GameManager : MonoBehaviour
     {
         gridManager.RestoreGrid(savedGridData);
     }
+
+    public void CreateNewGame()
+    {
+        saveManager.NewGame();
+    }
 }

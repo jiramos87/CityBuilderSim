@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PowerPlant : MonoBehaviour, IBuilding
 {
@@ -18,6 +19,8 @@ public class PowerPlant : MonoBehaviour, IBuilding
     public int BaseOutput { get; private set; }
 
     public GameObject Prefab { get; private set; }
+
+    public GameObject powerPlantNuclearPrefab;
 
     public Building.BuildingType BuildingType { get; private set; }
 
@@ -85,5 +88,15 @@ public class PowerPlant : MonoBehaviour, IBuilding
 
         // Example: Notify CityStats of power output change
         // CityStats.Instance.UpdatePowerOutput();
+    }
+
+    public List<GameObject> GetPowerPlantPrefabs()
+    {
+        List<GameObject> powerPlantPrefabs = new List<GameObject>()
+        {
+            powerPlantNuclearPrefab
+        };
+
+        return powerPlantPrefabs;
     }
 }

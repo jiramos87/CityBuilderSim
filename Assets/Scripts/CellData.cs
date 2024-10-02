@@ -6,6 +6,7 @@ public class CellData
     public bool hasRoadAtRight;
     public bool hasRoadAtBottom;
     public int population;
+    public PowerPlant powerPlant;
     public int powerOutput;
     public int powerConsumption;
     public string buildingType;
@@ -16,4 +17,6 @@ public class CellData
     public string prefabName;
     public string zoneType; // Store the enum as a string for easy serialization
     public string occupiedBuildingName;
+    public bool isPivot;
+    public int sortingOrder;
 }

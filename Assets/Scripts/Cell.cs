@@ -15,6 +15,7 @@ public class Cell : MonoBehaviour
     public int y;
     public int happiness;
     public string prefabName;
+    public bool isPivot;
     public PowerPlant powerPlant { get; set; }
 
     public Zone.ZoneType zoneType;
@@ -23,6 +24,7 @@ public class Cell : MonoBehaviour
     public GameObject prefab { get; set; }
 
     private string occupiedBuildingName;
+    public int sortingOrder;
 
     void Start()
     {
@@ -44,6 +46,7 @@ public class Cell : MonoBehaviour
         prefab = grassPrefab;
         prefabName = grassPrefab.name;
         occupiedBuildingName = "";
+        isPivot = false;
     }
 
     public string GetBuildingType()
@@ -113,7 +116,9 @@ public class Cell : MonoBehaviour
             happiness = happiness,
             prefabName = prefabName,
             zoneType = zoneType.ToString(),
-            occupiedBuildingName = occupiedBuilding != null ? occupiedBuilding.name : "" // Check for null
+            occupiedBuildingName = occupiedBuilding != null ? occupiedBuilding.name : "",
+            isPivot = isPivot,
+            sortingOrder = sortingOrder
         };
 
         return cellData;
@@ -136,5 +141,11 @@ public class Cell : MonoBehaviour
         prefabName = cellData.prefabName;
         zoneType = (Zone.ZoneType)System.Enum.Parse(typeof(Zone.ZoneType), cellData.zoneType);
         occupiedBuildingName = cellData.occupiedBuildingName;
+        isPivot = cellData.isPivot;
+    }
+
+    public int GetSortingOrder()
+    {
+        return sortingOrder;
     }
 }

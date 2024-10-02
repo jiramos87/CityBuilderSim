@@ -29,6 +29,7 @@ public class GridManager : MonoBehaviour
     public GameObject roadTilePrefabElbowDownLeft;
     public GameObject roadTilePrefabElbowDownRight;
 
+    public List<GameObject> roadTilePrefabs;
     private Vector2 startPosition;
     private bool isDrawingRoad = false;
 
@@ -62,6 +63,21 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {
+        roadTilePrefabs = new List<GameObject>
+        {
+            roadTilePrefab1,
+            roadTilePrefab2,
+            roadTilePrefabCrossing,
+            roadTilePrefabTIntersectionUp,
+            roadTilePrefabTIntersectionDown,
+            roadTilePrefabTIntersectionLeft,
+            roadTilePrefabTIntersectionRight,
+            roadTilePrefabElbowUpLeft,
+            roadTilePrefabElbowUpRight,
+            roadTilePrefabElbowDownLeft,
+            roadTilePrefabElbowDownRight
+        };
+
         CreateGrid();
     }
 
@@ -98,6 +114,7 @@ public class GridManager : MonoBehaviour
 
                 cellComponent.prefab = tilePrefab;
                 cellComponent.prefabName = tilePrefab.name;
+                cellComponent.isPivot = false;
 
                 gridArray[x, y] = gridCell;
 
@@ -109,10 +126,8 @@ public class GridManager : MonoBehaviour
                 );
                 zoneTile.transform.SetParent(gridCell.transform);
 
-                // Set a low sorting order for the grass tile
-                SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
-                sr.sortingOrder = -1001; // Use a very low value to ensure it's always in the background
-
+                int sortingOrder = SetTileSortingOrder(zoneTile, Zone.ZoneType.Grass);
+                cellComponent.sortingOrder = sortingOrder;
 
                 // Ensure the zoneTile has a PolygonCollider2D
                 PolygonCollider2D polygonCollider = zoneTile.GetComponent<PolygonCollider2D>();
@@ -185,6 +200,11 @@ public class GridManager : MonoBehaviour
     {
         try
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mouseGridPosition = GetGridPosition(worldPoint);
 
@@ -241,6 +261,7 @@ public class GridManager : MonoBehaviour
         cellComponent.buildingSize = 1;
         cellComponent.prefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass);
         cellComponent.prefabName = cellComponent.prefab.name;
+        cellComponent.isPivot = false;
     }
 
     void RestoreTile(GameObject cell)
@@ -253,9 +274,8 @@ public class GridManager : MonoBehaviour
 
         zoneTile.transform.SetParent(cell.transform);
 
-        SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
-
-        sr.sortingOrder = -1001;
+        int sortingOrder = SetTileSortingOrder(zoneTile, Zone.ZoneType.Grass);
+        cell.GetComponent<Cell>().sortingOrder = sortingOrder;
     }
 
     void BulldozeTile (GameObject cell)
@@ -530,6 +550,7 @@ public class GridManager : MonoBehaviour
         cellComponent.buildingSize = 1;
         cellComponent.powerPlant = null;
         cellComponent.occupiedBuilding = null;
+        cellComponent.isPivot = false;
     }
 
     void PlaceZone(Vector3 gridPosition)
@@ -565,8 +586,8 @@ public class GridManager : MonoBehaviour
 
             UpdatePlacedZoneCellAttributes(cell, selectedZoneType, zonePrefab, zoneAttributes);
 
-            SpriteRenderer sr = zoneTile.GetComponent<SpriteRenderer>();
-            sr.sortingOrder = -1000;
+            int sortingOrder = SetTileSortingOrder(zoneTile, selectedZoneType);
+            cell.GetComponent<Cell>().sortingOrder = sortingOrder;
 
             addZonedTileToList(gridPosition, selectedZoneType);
 
@@ -608,6 +629,8 @@ public class GridManager : MonoBehaviour
                 break;
             case Zone.ZoneType.IndustrialHeavyZoning:
                 zonedIndustrialHeavyPositions.Add(zonedPosition);
+                break;
+            default:
                 break;
         }
     }
@@ -657,10 +680,11 @@ public class GridManager : MonoBehaviour
         {
             return;
         }
-        
-        int buildingSize = sectionResult.Value.size;
-        Vector2[] section = sectionResult.Value.section;
 
+        Vector2[] section = sectionResult.Value.section;
+        // building size is sqrt of section size
+        int buildingSize = (int)Math.Sqrt(section.Length);
+        
         Zone.ZoneType buildingZoneType = GetBuildingZoneType(zoningType);
 
         ZoneAttributes zoneAttributes = GetZoneAttributes(buildingZoneType);
@@ -695,7 +719,7 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void UpdateCellAttributes(Cell cellComponent, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, GameObject prefab)
+    void UpdateCellAttributes(Cell cellComponent, Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes, GameObject prefab, int buildingSize)
     {
         cellComponent.zoneType = selectedZoneType;
         cellComponent.population = zoneAttributes.Population;
@@ -704,26 +728,41 @@ public class GridManager : MonoBehaviour
         cellComponent.prefab = prefab;
         cellComponent.prefabName = prefab.name;
         cellComponent.buildingType = prefab.name;
+        cellComponent.buildingSize = buildingSize;
+        cellComponent.isPivot = false;
     }
 
-    void PlaceZoneBuildingTile(GameObject prefab, GameObject cell, int buildingSize = 1)
+    void PlaceZoneBuildingTile(GameObject prefab, GameObject gridCell, int buildingSize = 1)
     {
-        Vector3 worldPosition = cell.transform.position;
+        Cell cell = gridCell.GetComponent<Cell>();
 
-        if (buildingSize > 1)
+        if (buildingSize > 1 && !cell.isPivot)
+        {
+            return;
+        }
+
+        Vector3 worldPosition = gridCell.transform.position;
+
+        if (buildingSize > 1 && cell.zoneType != Zone.ZoneType.Building)
         {
           Vector3 offset = new Vector3(0, -(buildingSize - 1) * tileHeight / 2, 0);
           worldPosition -= offset;
         }
-        
+
+        DestroyCellChildren(gridCell, new Vector2(cell.x, cell.y));
+
         GameObject zoneTile = Instantiate(
           prefab,
           worldPosition,
           Quaternion.identity
         );
-        zoneTile.transform.SetParent(cell.transform);
+        zoneTile.transform.SetParent(gridCell.transform);
 
-        SetTileSortingOrder(zoneTile);
+        cell.isPivot = true;
+
+        int sortingOrder = SetTileSortingOrder(zoneTile, cell.zoneType);
+
+        cell.sortingOrder = sortingOrder;
     }
 
     void UpdateZonedBuildingPlacementStats(Zone.ZoneType selectedZoneType, ZoneAttributes zoneAttributes)
@@ -748,16 +787,17 @@ public class GridManager : MonoBehaviour
 
             DestroyCellChildren(cell, zonedPosition);
 
-            UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes, prefab);
+            UpdateCellAttributes(cell.GetComponent<Cell>(), selectedZoneType, zoneAttributes, prefab, buildingSize);
 
             removeZonedPositionFromList(zonedPosition, zoningType);
         }
 
         Vector2 firstPosition = section[0];
+        gridArray[(int)firstPosition.x, (int)firstPosition.y].GetComponent<Cell>().isPivot = true;
+
         PlaceZoneBuildingTile(prefab, gridArray[(int)firstPosition.x, (int)firstPosition.y], buildingSize);
 
         UpdateZonedBuildingPlacementStats(selectedZoneType, zoneAttributes);
-        RemoveZonedSectionFromList(section, zoningType);
     }
 
     private Vector2 FindCenterPosition(Vector2[] section)
@@ -823,13 +863,24 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void SetTileSortingOrder(GameObject tile)
+    private int SetTileSortingOrder(GameObject tile, Zone.ZoneType zoneType = Zone.ZoneType.Grass)
     {
         Vector3 gridPos = GetGridPosition(tile.transform.position);
         int x = (int)gridPos.x;
         int y = (int)gridPos.y;
         SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
-        sr.sortingOrder = -(y * 10 + x) - 100;
+        var sortingOrder = 0;
+        switch (zoneType)
+        {
+            case Zone.ZoneType.Grass:
+                sortingOrder = -1001;
+                sr.sortingOrder = sortingOrder;
+                return sortingOrder;
+            default:
+                sortingOrder = -(y * 10 + x) - 100;
+                sr.sortingOrder = sortingOrder;
+                return sortingOrder;
+        }
     }
 
     void HandleRoadDrawing(Vector2 gridPosition)
@@ -910,12 +961,6 @@ public class GridManager : MonoBehaviour
         collider.isTrigger = true;
     }
 
-    void SetSpriteRendererSortingOrder(GameObject tile, int order)
-    {
-        SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
-        sr.sortingOrder = order;
-    }
-
     void SetRoadTileZoneDetails(GameObject roadTile)
     {
         Zone zone = roadTile.AddComponent<Zone>();
@@ -925,7 +970,8 @@ public class GridManager : MonoBehaviour
     void SetPreviewRoadTileDetails(GameObject previewTile)
     {
       SetPreviewTileCollider(previewTile);
-      SetSpriteRendererSortingOrder(previewTile, -999);
+      int sortingOrder = SetTileSortingOrder(previewTile, Zone.ZoneType.Road);
+
       SetRoadTileZoneDetails(previewTile);
       previewTile.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
     }
@@ -974,6 +1020,7 @@ public class GridManager : MonoBehaviour
         foreach (Vector2 adjacentRoadTile in adjacentRoadTiles)
         {
             bool isAdjacent = true;
+
             if (!isAdjacentRoadInPreview(adjacentRoadTile))
             {
                 PlaceRoadTile(adjacentRoadTile, i, isAdjacent);
@@ -1006,6 +1053,11 @@ public class GridManager : MonoBehaviour
     {
         if (cell.transform.childCount > 0)
         {
+            if (cell.GetComponent<Cell>().zoneType == Zone.ZoneType.Road)
+            {
+                DestroyImmediate(cell.transform.GetChild(0).gameObject);
+            }
+
             foreach (Transform child in cell.transform)
             {
                 Zone zone = child.GetComponent<Zone>();
@@ -1032,6 +1084,7 @@ public class GridManager : MonoBehaviour
         cellComponent.population = 0;
         cellComponent.powerConsumption = 0;
         cellComponent.happiness = 0;
+        cellComponent.isPivot = false;
     }
 
     void PlaceRoadTile(Vector2 gridPos, int i = 0, bool isAdjacent = false)
@@ -1069,7 +1122,8 @@ public class GridManager : MonoBehaviour
 
         UpdateRoadCellAttributes(cell, roadTile, zoneType);
 
-        SetSpriteRendererSortingOrder(roadTile, -1000);
+        int sortingOrder = SetTileSortingOrder(roadTile, zoneType);
+        cell.GetComponent<Cell>().sortingOrder = sortingOrder;
 
         roadTile.transform.SetParent(cell.transform);
     }
@@ -1117,7 +1171,7 @@ public class GridManager : MonoBehaviour
         bool hasRight = IsRoadAt(currGridPos + new Vector2(1, 0));
         bool hasUp = IsRoadAt(currGridPos + new Vector2(0, 1));
         bool hasDown = IsRoadAt(currGridPos + new Vector2(0, -1));
-  
+
         if (isCenterRoadTile) {
           UpdateAdjacentRoadTilesArray(currGridPos, hasLeft, hasRight, hasUp, hasDown, isPreview);
         }
@@ -1209,6 +1263,11 @@ public class GridManager : MonoBehaviour
 
         if (cell != null && cell.transform.childCount > 0)
         {
+            if (cell.GetComponent<Cell>().zoneType == Zone.ZoneType.Road)
+            {
+                return true;
+            }
+
             for (int i = 0; i < cell.transform.childCount; i++)
             {
                 Transform child = cell.transform.GetChild(i);
@@ -1304,9 +1363,9 @@ public class GridManager : MonoBehaviour
                 int gridX = (int)gridPosition.x + x - buildingSize / 2;
                 int gridY = (int)gridPosition.y + y - buildingSize / 2;
 
-                if (gridArray[gridX, gridY].transform.childCount > 0 &&
-                  gridArray[gridX, gridY].GetComponent<Cell>().zoneType != Zone.ZoneType.Grass
-                )
+                Cell cell = gridArray[gridX, gridY].GetComponent<Cell>();
+
+                if (cell.zoneType != Zone.ZoneType.Grass)
                 {
                     return false;
                 }
@@ -1315,15 +1374,13 @@ public class GridManager : MonoBehaviour
         return true;
     }
 
-    void UpdatePlacedBuildingCellAttributes(GameObject gridCell, GameObject building, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab)
+    void UpdatePlacedBuildingCellAttributes(Cell cell, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab, Zone.ZoneType zoneType = Zone.ZoneType.Building, GameObject building = null)
     {
-        Cell cell = gridCell.GetComponent<Cell>();
-
         cell.occupiedBuilding = building;
         cell.buildingSize = buildingSize;
         cell.prefab = buildingPrefab;
         cell.prefabName = buildingPrefab.name;
-        cell.zoneType = Zone.ZoneType.Building;
+        cell.zoneType = zoneType;
 
         if (powerPlant != null)
         {
@@ -1332,8 +1389,14 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    void UpdateBuildingTilesAttributes(Vector2 gridPos, GameObject building, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab)
+    void SetCellAsBuildingPivot(Cell cell)
     {
+        cell.isPivot = true;
+    }
+
+    void UpdateBuildingTilesAttributes(Vector2 gridPos, GameObject building, int buildingSize, PowerPlant powerPlant, GameObject buildingPrefab)
+    {   
+        
         for (int x = 0; x < buildingSize; x++)
         {
             for (int y = 0; y < buildingSize; y++)
@@ -1343,11 +1406,14 @@ public class GridManager : MonoBehaviour
 
                 GameObject gridCell = gridArray[gridX, gridY];
 
-                UpdatePlacedBuildingCellAttributes(gridCell, building, buildingSize, powerPlant, buildingPrefab);
+                Cell cell = gridCell.GetComponent<Cell>();
+
+                UpdatePlacedBuildingCellAttributes(cell, buildingSize, powerPlant, buildingPrefab, Zone.ZoneType.Building, building);
 
                 if (gridX == gridPos.x && gridY == gridPos.y)
                 {
                     DestroyCellChildren(gridCell, new Vector2(gridX, gridY));
+                    SetCellAsBuildingPivot(cell);
                 }
             }
         }
@@ -1376,8 +1442,18 @@ public class GridManager : MonoBehaviour
         GameObject building = Instantiate(buildingPrefab, position, Quaternion.identity);
         building.transform.SetParent(gridArray[(int)gridPos.x, (int)gridPos.y].transform);
 
-        SetTileSortingOrder(building);
+        int sortingOrder = SetTileSortingOrder(building, Zone.ZoneType.Building);
+        gridArray[(int)gridPos.x, (int)gridPos.y].GetComponent<Cell>().sortingOrder = sortingOrder;
         HandleBuildingPlacementAttributesUpdate(iBuilding, gridPos, building, buildingPrefab);
+    }
+
+    void LoadBuildingTile(GameObject prefab, Vector2 gridPos, int buildingSize)
+    {
+        GameObject building = Instantiate(prefab, GetWorldPosition((int)gridPos.x, (int)gridPos.y), Quaternion.identity);
+        building.transform.SetParent(gridArray[(int)gridPos.x, (int)gridPos.y].transform);
+
+        int sortingOrder = SetTileSortingOrder(building, Zone.ZoneType.Building);
+        gridArray[(int)gridPos.x, (int)gridPos.y].GetComponent<Cell>().sortingOrder = sortingOrder;
     }
 
     void PlaceBuilding(Vector2 gridPos, IBuilding iBuilding)
@@ -1463,7 +1539,6 @@ public class GridManager : MonoBehaviour
 
                 for (int i = zonedPositions.Count - 1; i >= 0; i--)
                 {
-                    Debug.Log("CalculateAvailableSquareZonedSections for i: " + i + " zonedPositions[i]: " + zonedPositions[i] + " for zoneType: " + zoneType);
                     Vector2 start = zonedPositions[i];
 
                     List<Vector2> section = GetSquareSection(start, size, zonedPositions);
@@ -1528,10 +1603,21 @@ public class GridManager : MonoBehaviour
     {
         cell.GetComponent<Cell>().SetCellData(cellData);
 
+        Zone.ZoneType zoneType = GetZoneTypeFromZoneTypeString(cellData.zoneType);
+
         GameObject tilePrefab = zoneManager.FindPrefabByName(cellData.prefabName);
         if (tilePrefab != null)
         {
             PlaceZoneBuildingTile(tilePrefab, cell, cellData.buildingSize);
+            UpdatePlacedBuildingCellAttributes(cell.GetComponent<Cell>(), cellData.buildingSize, cellData.powerPlant, tilePrefab, zoneType, null);
+        }
+
+        addZonedTileToList(new Vector2(cellData.x, cellData.y), zoneType);
+
+        PowerPlant powerPlant = cellData.powerPlant;
+        if (powerPlant != null)
+        {
+            cityStats.RegisterPowerPlant(powerPlant);
         }
     }
 
@@ -1543,5 +1629,39 @@ public class GridManager : MonoBehaviour
 
             RestoreGridCell(cellData, cell);
         }
+
+        CalculateAvailableSquareZonedSections();
+    }
+
+    public List<GameObject> GetRoadPrefabs()
+    {
+        return roadTilePrefabs;
+    }
+
+    private Zone.ZoneType GetZoneTypeFromZoneTypeString(string zoneTypeString)
+    {
+        return (Zone.ZoneType)Enum.Parse(typeof(Zone.ZoneType), zoneTypeString);
+    }
+
+    public void ResetGrid()
+    {
+        foreach (GameObject cell in gridArray)
+        {
+            Destroy(cell);
+        }
+
+        zonedResidentialLightPositions.Clear();
+        zonedResidentialMediumPositions.Clear();
+        zonedResidentialHeavyPositions.Clear();
+        zonedCommercialLightPositions.Clear();
+        zonedCommercialMediumPositions.Clear();
+        zonedCommercialHeavyPositions.Clear();
+        zonedIndustrialLightPositions.Clear();
+        zonedIndustrialMediumPositions.Clear();
+        zonedIndustrialHeavyPositions.Clear();
+
+        availableZoneSections.Clear();
+
+        CreateGrid();
     }
 }

@@ -17,23 +17,20 @@ public class GameSaveManager : MonoBehaviour
 
     public void SaveGame(string customSaveName = null)
     {
-        Debug.Log("Saving game...name: " + customSaveName);
         GameSaveData saveData = new GameSaveData();
         saveData.cityName = cityStats.cityName; 
         saveData.realWorldSaveTime = DateTime.Now;
         saveData.saveName = customSaveName ?? $"{saveData.cityName}_{saveData.realWorldSaveTime:yyyyMMdd_HHmmss}";
-        Debug.Log("saveData" + saveData);
+
         saveData.inGameTime = timeManager.GetCurrentInGameTime();
         saveData.gridData = gridManager.GetGridData();
         saveData.cityStats = cityStats.GetCityStatsData();
         // saveData.playerSettings = GetPlayerSettings();
 
         string json = JsonUtility.ToJson(saveData);
-        Debug.Log("json" + json);
+
         string path = Path.Combine(Application.persistentDataPath, saveData.saveName + ".json");
         File.WriteAllText(path, json);
-
-        Debug.Log($"Game saved as {saveData.saveName} at {path}");
     }
 
     public void LoadGame(string saveFilePath)
@@ -44,12 +41,20 @@ public class GameSaveManager : MonoBehaviour
             GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(json);
 
             gridManager.RestoreGrid(saveData.gridData);
-            Debug.Log("Game loaded from: " + saveFilePath);
+            cityStats.RestoreCityStatsData(saveData.cityStats);
+            timeManager.RestoreInGameTime(saveData.inGameTime);
         }
         else
         {
             Debug.LogWarning("Save file not found!");
         }
+    }
+
+    public void NewGame()
+    {
+        gridManager.ResetGrid();
+        cityStats.ResetCityStats();
+        timeManager.ResetInGameTime();
     }
 }
 

@@ -9,7 +9,10 @@ public class RoadsSelectorButton : MonoBehaviour
 
     public void OnRoadsButtonClick()
     {
+        uiManager.RestoreMouseCursor();
         popupController.ShowPopup(roadItems, OnRoadTypeSelected, "Roads");
+
+        OnRoadTypeSelected(roadItems[0]);
     }
 
     private void OnRoadTypeSelected(BuildingSelectorMenuManager.ItemType selectedItem)

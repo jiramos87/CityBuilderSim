@@ -8,8 +8,11 @@ public class IndustrialZoningSelectorButton : MonoBehaviour
     public UIManager uiManager; // Reference to the UIManager
 
     public void OnIndustrialZoningButtonClick()
-    {
+    {   
+        uiManager.RestoreMouseCursor();
         popupController.ShowPopup(industrialZoningItems, OnIndustrialZoningSelected, "Industrial");
+
+        OnIndustrialZoningSelected(industrialZoningItems[0]);
     }
 
     private void OnIndustrialZoningSelected(BuildingSelectorMenuManager.ItemType selectedItem)

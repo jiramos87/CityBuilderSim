@@ -56,6 +56,9 @@ public class ZoneManager : MonoBehaviour
 
     private Dictionary<(Zone.ZoneType, int), List<GameObject>> zonePrefabs;
 
+    public GridManager gridManager;
+    public PowerPlant powerPlantManager;
+
     void Start()
     {
         zonePrefabs = new Dictionary<(Zone.ZoneType, int), List<GameObject>>
@@ -96,7 +99,6 @@ public class ZoneManager : MonoBehaviour
             { (Zone.ZoneType.IndustrialLightZoning, 1), industrialLightZoningPrefabs },
             { (Zone.ZoneType.IndustrialMediumZoning, 1), industrialMediumZoningPrefabs },
             { (Zone.ZoneType.IndustrialHeavyZoning, 1), industrialHeavyZoningPrefabs },
-            { (Zone.ZoneType.Road, 1), roadPrefabs },
             { (Zone.ZoneType.Grass, 1), grassPrefabs }
         };
     }
@@ -119,18 +121,39 @@ public class ZoneManager : MonoBehaviour
 
     public GameObject FindPrefabByName(string prefabName)
     {
+        string trimmedName = prefabName.Replace("(Clone)", "");
+
+        List<GameObject> roadPrefabs = gridManager.GetRoadPrefabs();
+        List<GameObject> powerPlantPrefabs = powerPlantManager.GetPowerPlantPrefabs();
+
         foreach (var prefabList in zonePrefabs.Values)
         {
             foreach (GameObject prefab in prefabList)
             {
-                if (prefab.name == prefabName)
+                if (prefab.name == trimmedName)
                 {
                     return prefab;
                 }
             }
         }
 
-        Debug.LogWarning($"Prefab with name {prefabName} not found.");
+        foreach (var prefab in roadPrefabs)
+        {
+            if (prefab.name == trimmedName)
+            {
+                return prefab;
+            }
+        }
+
+        foreach (var prefab in powerPlantPrefabs)
+        {
+            if (prefab.name == trimmedName)
+            {
+                return prefab;
+            }
+        }
+
+        Debug.LogWarning($"Prefab with name {trimmedName} not found.");
         return null;
     }
 }

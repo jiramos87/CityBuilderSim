@@ -536,6 +536,12 @@ public class CityStats : MonoBehaviour
         cityPowerOutput = totalPowerOutput;
     }
 
+    public void ResetPowerPlants()
+    {
+        powerPlants.Clear();
+        cityPowerOutput = 0;
+    }
+
     public int GetTotalPowerOutput()
     {
         return cityPowerOutput;
@@ -629,6 +635,59 @@ public class CityStats : MonoBehaviour
         };
 
         return cityStatsData;
+    }
+
+    public void RestoreCityStatsData(CityStatsData cityStatsData)
+    {
+        currentDate = cityStatsData.currentDate;
+        population = cityStatsData.population;
+        money = cityStatsData.money;
+        happiness = cityStatsData.happiness;
+        residentialZoneCount = cityStatsData.residentialZoneCount;
+        residentialBuildingCount = cityStatsData.residentialBuildingCount;
+        commercialZoneCount = cityStatsData.commercialZoneCount;
+        commercialBuildingCount = cityStatsData.commercialBuildingCount;
+        industrialZoneCount = cityStatsData.industrialZoneCount;
+        industrialBuildingCount = cityStatsData.industrialBuildingCount;
+        residentialLightBuildingCount = cityStatsData.residentialLightBuildingCount;
+        residentialLightZoningCount = cityStatsData.residentialLightZoningCount;
+        residentialMediumBuildingCount = cityStatsData.residentialMediumBuildingCount;
+        residentialMediumZoningCount = cityStatsData.residentialMediumZoningCount;
+        residentialHeavyBuildingCount = cityStatsData.residentialHeavyBuildingCount;
+        residentialHeavyZoningCount = cityStatsData.residentialHeavyZoningCount;
+        commercialLightBuildingCount = cityStatsData.commercialLightBuildingCount;
+        commercialLightZoningCount = cityStatsData.commercialLightZoningCount;
+        commercialMediumBuildingCount = cityStatsData.commercialMediumBuildingCount;
+        commercialMediumZoningCount = cityStatsData.commercialMediumZoningCount;
+        commercialHeavyBuildingCount = cityStatsData.commercialHeavyBuildingCount;
+        commercialHeavyZoningCount = cityStatsData.commercialHeavyZoningCount;
+        industrialLightBuildingCount = cityStatsData.industrialLightBuildingCount;
+        industrialLightZoningCount = cityStatsData.industrialLightZoningCount;
+        industrialMediumBuildingCount = cityStatsData.industrialMediumBuildingCount;
+        industrialMediumZoningCount = cityStatsData.industrialMediumZoningCount;
+        industrialHeavyBuildingCount = cityStatsData.industrialHeavyBuildingCount;
+        industrialHeavyZoningCount = cityStatsData.industrialHeavyZoningCount;
+        roadCount = cityStatsData.roadCount;
+        grassCount = cityStatsData.grassCount;
+        cityPowerConsumption = cityStatsData.cityPowerConsumption;
+        cityPowerOutput = cityStatsData.cityPowerOutput;
+        cityName = cityStatsData.cityName;
+    }
+
+    public void ResetCityStats()
+    {
+        ResetPowerPlants();
+
+        population = 0;
+        money = 20000;
+        residentialZoneCount = 0;
+        commercialZoneCount = 0;
+        industrialZoneCount = 0;
+        roadCount = 0;
+        grassCount = 0;
+        cityPowerConsumption = 0;
+        cityPowerOutput = 0;
+        cityName = "City";
     }
 }
 

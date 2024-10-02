@@ -18,6 +18,11 @@ public class TimeManager : MonoBehaviour
     void Start()
     {
         currentDate = new System.DateTime(2024, 8, 27); // Starting date
+
+        // Trim the time to only include the date, not the time
+
+        currentDate = currentDate.Date;
+
         uiManager.UpdateUI();
     }
 
@@ -117,6 +122,16 @@ public class TimeManager : MonoBehaviour
         inGameTime.month = currentDate.Month;
         inGameTime.year = currentDate.Year;
         return inGameTime;
+    }
+
+    public void RestoreInGameTime(InGameTime inGameTime)
+    {
+        currentDate = new System.DateTime(inGameTime.year, inGameTime.month, inGameTime.day);
+    }
+
+    public void ResetInGameTime()
+    {
+        currentDate = new System.DateTime(2024, 8, 27);
     }
 }
 

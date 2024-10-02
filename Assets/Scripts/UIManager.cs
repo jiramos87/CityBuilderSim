@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -32,6 +34,7 @@ public class UIManager : MonoBehaviour
     public Text detailsPowerConsumptionText;
     public Text detailsDateBuiltText;
     public Text detailsBuildingTypeText;
+    public Text detailsSortingOrderText;
 
     public Image detailsImage;
 
@@ -49,6 +52,14 @@ public class UIManager : MonoBehaviour
 
     public string saveName;
 
+    public GameObject loadGameMenu;
+    public Transform savedGamesListContainer;
+    public GameObject savedGameButtonPrefab;
+
+    private string saveFolderPath;
+
+    public Text GameSavedText;
+
     void Start()
     {
         if (cityStats == null)
@@ -58,6 +69,8 @@ public class UIManager : MonoBehaviour
 
         selectedZoneType = Zone.ZoneType.Grass;
         bulldozeMode = false;
+
+        saveFolderPath = Application.persistentDataPath;
     }
 
     void Update()
@@ -65,6 +78,16 @@ public class UIManager : MonoBehaviour
         if (cityStats != null)
         {
             UpdateUI();
+        }
+
+        // Check if the Escape key is pressed
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // Check if the load game panel is currently active
+            if (loadGameMenu.activeSelf)
+            {
+                CloseLoadGameMenu();
+            }
         }
     }
 
@@ -76,7 +99,7 @@ public class UIManager : MonoBehaviour
         happinessText.text = "Happiness: " + cityStats.happiness;
         cityPowerOutputText.text = "City Power Output: " + cityStats.cityPowerOutput + " MW";
         cityPowerConsumptionText.text = "City Power Consumption: " + cityStats.cityPowerConsumption + " MW";
-        dateText.text = "Date: " + timeManager.GetCurrentDate();
+        dateText.text = "Date: " + timeManager.GetCurrentDate().Date;
         residentialTaxText.text = "Residential Tax: " + economyManager.GetResidentialTax() + "%";
         commercialTaxText.text = "Commercial Tax: " + economyManager.GetCommercialTax() + "%";
         industrialTaxText.text = "Industrial Tax: " + economyManager.GetIndustrialTax() + "%";
@@ -263,6 +286,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowTileDetails(Cell cell)
     {
+        Debug.Log("Showing details for cell at: " + cell.x + ", " + cell.y + " with cell.GetBuildingType() " + cell.GetBuildingType() + " and cell.buildingType " + cell.buildingType);
         detailsPopupController.ShowDetails();
         detailsNameText.text = cell.GetBuildingName();
         detailsOccupancyText.text = "Occupancy: " + cell.GetPopulation();
@@ -272,6 +296,7 @@ public class UIManager : MonoBehaviour
         // detailsDateBuiltText.text = "Date Built: " + timeManager.GetCurrentDate();
         detailsBuildingTypeText.text = "Building Type: " + cell.GetBuildingType();
         detailsImage.sprite = cell.GetCellPrefab().GetComponent<SpriteRenderer>().sprite;
+        detailsSortingOrderText.text = "Sorting Order: " + cell.GetSortingOrder();
     }
 
     public bool IsDetailsMode()
@@ -282,10 +307,63 @@ public class UIManager : MonoBehaviour
     public void OnSaveGameButtonClicked()
     {
         gameManager.SaveGame(saveName);
+        // Show the game saved text for 3 seconds
+
+        GameSavedText.gameObject.SetActive(true);
+
+        Invoke("HideGameSavedText", 3f);
+    }
+
+    public void HideGameSavedText()
+    {
+        GameSavedText.gameObject.SetActive(false);
+    }
+
+    public void OnLoadButtonClicked()
+    {
+        loadGameMenu.SetActive(true);
+
+        foreach (Transform child in savedGamesListContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        string[] saveFiles = Directory.GetFiles(saveFolderPath, "*.json");
+
+        foreach (string saveFile in saveFiles)
+        {
+            GameObject newButton = Instantiate(savedGameButtonPrefab, savedGamesListContainer);
+            newButton.GetComponentInChildren<Text>().text = Path.GetFileNameWithoutExtension(saveFile);
+
+            newButton.GetComponent<Button>().onClick.AddListener(() => OnSavedGameSelected(saveFile));
+        }
+    }
+
+    // Called when a saved game is selected
+    public void OnSavedGameSelected(string saveFilePath)
+    {
+        loadGameMenu.SetActive(false); // Close the load game menu
+        OnLoadGameButtonClicked(saveFilePath); // Load the selected game
     }
 
     public void OnLoadGameButtonClicked(string saveFilePath)
     {
-        gameManager.LoadGame(saveFilePath);
+        gameManager.LoadGame(saveFilePath); // Call the game manager to load the game
+    }
+
+    public void CloseLoadGameMenu()
+    {
+        loadGameMenu.SetActive(false);
+    }
+
+    public void OnNewGameButtonClicked()
+    {
+        gameManager.CreateNewGame();
+    }
+
+    public void RestoreMouseCursor()
+    {
+        cursorManager.SetDefaultCursor();
+        cursorManager.RemovePreview();
     }
 }
