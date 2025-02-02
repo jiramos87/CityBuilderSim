@@ -286,7 +286,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowTileDetails(Cell cell)
     {
-        Debug.Log("Showing details for cell at: " + cell.x + ", " + cell.y + " with cell.GetBuildingType() " + cell.GetBuildingType() + " and cell.buildingType " + cell.buildingType);
         detailsPopupController.ShowDetails();
         detailsNameText.text = cell.GetBuildingName();
         detailsOccupancyText.text = "Occupancy: " + cell.GetPopulation();

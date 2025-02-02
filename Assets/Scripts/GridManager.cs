@@ -60,6 +60,8 @@ public class GridManager : MonoBehaviour
     private List<GameObject> previewZoningTiles = new List<GameObject>();
     private Dictionary<Zone.ZoneType, List<List<Vector2>>> availableZoneSections =
       new Dictionary<Zone.ZoneType, List<List<Vector2>>>(); // Dictionary to store available zone sections
+    
+    public TerrainManager terrainManager;
 
     void Start()
     {
@@ -90,11 +92,12 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 GameObject gridCell = new GameObject($"Cell_{x}_{y}");
-                    
-                // Calculate the isometric position
+                        
+                // Calculate the isometric position with height consideration
                 float posX = (x - y) * (tileWidth / 2);
                 float posY = (x + y) * (tileHeight / 2);
-                    
+                
+                // The cell's position will be updated by TerrainManager when heights are applied
                 gridCell.transform.position = new Vector3(posX, posY, 0);
                 gridCell.transform.SetParent(transform);
 
@@ -109,6 +112,7 @@ public class GridManager : MonoBehaviour
                 cellComponent.buildingType = null;
                 cellComponent.buildingSize = 1;
                 cellComponent.powerPlant = null;
+                cellComponent.height = 1; // Set initial height
 
                 GameObject tilePrefab = zoneManager.GetRandomZonePrefab(Zone.ZoneType.Grass, 1);
 
@@ -141,10 +145,12 @@ public class GridManager : MonoBehaviour
                 if (zoneComponent == null)
                 {
                     zoneComponent = zoneTile.AddComponent<Zone>();
-                    zoneComponent.zoneType = Zone.ZoneType.Grass; // Set the initial zone type
+                    zoneComponent.zoneType = Zone.ZoneType.Grass;
                 }
             }
         }
+
+        terrainManager.StartTerrainGeneration();
     }
 
     ZoneAttributes GetZoneAttributes(Zone.ZoneType zoneType)
@@ -868,23 +874,32 @@ public class GridManager : MonoBehaviour
         Vector3 gridPos = GetGridPosition(tile.transform.position);
         int x = (int)gridPos.x;
         int y = (int)gridPos.y;
+        Cell cell = gridArray[x, y].GetComponent<Cell>();
+        
         SpriteRenderer sr = tile.GetComponent<SpriteRenderer>();
         var sortingOrder = 0;
+        
         switch (zoneType)
         {
             case Zone.ZoneType.Grass:
-                sortingOrder = -1001;
+                sortingOrder = -1001 - (cell.height * 100); // Adjust based on height
                 sr.sortingOrder = sortingOrder;
                 return sortingOrder;
             default:
-                sortingOrder = -(y * 10 + x) - 100;
+                sortingOrder = -(y * 10 + x) - 100 - (cell.height * 100); // Adjust based on height
                 sr.sortingOrder = sortingOrder;
                 return sortingOrder;
         }
     }
 
+
     void HandleRoadDrawing(Vector2 gridPosition)
     {
+        if (!terrainManager.CanPlaceRoad((int)gridPosition.x, (int)gridPosition.y))
+        {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             isDrawingRoad = true;
@@ -899,7 +914,6 @@ public class GridManager : MonoBehaviour
         if (Input.GetMouseButtonUp(0) && isDrawingRoad)
         {
             isDrawingRoad = false;
-
             DrawRoadLine(true);
             ClearPreview(true);
         }
@@ -924,8 +938,11 @@ public class GridManager : MonoBehaviour
 
     public Vector2 GetWorldPosition(int gridX, int gridY)
     {
+        Cell cell = gridArray[gridX, gridY].GetComponent<Cell>();
+        float heightOffset = (cell.height - 1) * (tileHeight / 2); 
+        
         float posX = (gridX - gridY) * (tileWidth / 2);
-        float posY = (gridX + gridY) * (tileHeight / 2);
+        float posY = (gridX + gridY) * (tileHeight / 2) + heightOffset;
 
         return new Vector2(posX, posY);
     }
@@ -1258,30 +1275,16 @@ public class GridManager : MonoBehaviour
 
     bool IsAnyChildRoad(int gridX, int gridY)
     {
-        GameObject cell = gridArray[gridX, gridY];
-        bool isRoad = false;
-
-        if (cell != null && cell.transform.childCount > 0)
-        {
-            if (cell.GetComponent<Cell>().zoneType == Zone.ZoneType.Road)
-            {
-                return true;
-            }
-
-            for (int i = 0; i < cell.transform.childCount; i++)
-            {
-                Transform child = cell.transform.GetChild(i);
-                Zone zone = child.GetComponent<Zone>();
-
-                if (zone != null && zone.zoneType == Zone.ZoneType.Road)
-                {
-                    isRoad = true;
-                    break;
-                }
-            }
-        }
-
-        return isRoad;
+        var cell = gridArray[gridX, gridY];
+        if (cell == null || cell.transform.childCount == 0) return false;
+        
+        var cellComponent = cell.GetComponent<Cell>();
+        if (cellComponent?.zoneType == Zone.ZoneType.Road) return true;
+        
+        return cell.transform
+            .Cast<Transform>()
+            .Select(child => child.GetComponent<Zone>())
+            .Any(zone => zone != null && zone.zoneType == Zone.ZoneType.Road);
     }
 
     bool IsRoadAt(Vector2 gridPos)
@@ -1355,7 +1358,13 @@ public class GridManager : MonoBehaviour
         return line;
     }
 
-    bool canPlaceBuilding (Vector2 gridPosition, int buildingSize) {
+    bool canPlaceBuilding(Vector2 gridPosition, int buildingSize)
+    {
+        if (!terrainManager.CanPlaceBuilding((int)gridPosition.x, (int)gridPosition.y, buildingSize))
+        {
+            return false;
+        }
+
         for (int x = 0; x < buildingSize; x++)
         {
             for (int y = 0; y < buildingSize; y++)
@@ -1512,51 +1521,67 @@ public class GridManager : MonoBehaviour
     public void CalculateAvailableSquareZonedSections()
     {
         availableZoneSections.Clear();
-
-        foreach (Zone.ZoneType zoneType in Enum.GetValues(typeof(Zone.ZoneType)))
+        var validZoneTypes = GetValidZoneTypes();
+        
+        foreach (Zone.ZoneType zoneType in validZoneTypes)
         {
-            if (zoneType == Zone.ZoneType.None || zoneType == Zone.ZoneType.Road || zoneType == Zone.ZoneType.Building ||
-                zoneType == Zone.ZoneType.ResidentialLightBuilding || zoneType == Zone.ZoneType.ResidentialMediumBuilding ||
-                zoneType == Zone.ZoneType.ResidentialHeavyBuilding || zoneType == Zone.ZoneType.CommercialLightBuilding ||
-                zoneType == Zone.ZoneType.CommercialMediumBuilding || zoneType == Zone.ZoneType.CommercialHeavyBuilding ||
-                zoneType == Zone.ZoneType.IndustrialLightBuilding || zoneType == Zone.ZoneType.IndustrialMediumBuilding ||
-                zoneType == Zone.ZoneType.IndustrialHeavyBuilding)
-            {
-                continue;
-            }
-
-            List<List<Vector2>> sections = new List<List<Vector2>>();
-
-
-            for (int size = 1; size <= 3; size++)
-            {
-                List<Vector2> zonedPositions = GetZonedPositions(zoneType).ToList();
-
-                if (zonedPositions.Count == 0)
-                {
-                    continue;
-                }
-
-                for (int i = zonedPositions.Count - 1; i >= 0; i--)
-                {
-                    Vector2 start = zonedPositions[i];
-
-                    List<Vector2> section = GetSquareSection(start, size, zonedPositions);
-
-                    if (section.Count == size * size)
-                    {
-                        sections.Add(section);
-
-                        foreach (var pos in section)
-                        {
-                            zonedPositions.Remove(pos);
-                        }
-                    }
-                }
-            }
-
+            List<List<Vector2>> sections = CalculateSectionsForZoneType(zoneType);
             availableZoneSections.Add(zoneType, sections);
         }
+    }
+
+    private IEnumerable<Zone.ZoneType> GetValidZoneTypes()
+    {
+        var excludedTypes = new[]
+        {
+            Zone.ZoneType.None, Zone.ZoneType.Road, Zone.ZoneType.Building,
+            Zone.ZoneType.ResidentialLightBuilding, Zone.ZoneType.ResidentialMediumBuilding,
+            Zone.ZoneType.ResidentialHeavyBuilding, Zone.ZoneType.CommercialLightBuilding,
+            Zone.ZoneType.CommercialMediumBuilding, Zone.ZoneType.CommercialHeavyBuilding,
+            Zone.ZoneType.IndustrialLightBuilding, Zone.ZoneType.IndustrialMediumBuilding,
+            Zone.ZoneType.IndustrialHeavyBuilding
+        };
+
+        return Enum.GetValues(typeof(Zone.ZoneType))
+                  .Cast<Zone.ZoneType>()
+                  .Where(type => !excludedTypes.Contains(type));
+    }
+
+    private List<List<Vector2>> CalculateSectionsForZoneType(Zone.ZoneType zoneType)
+    {
+        List<List<Vector2>> sections = new List<List<Vector2>>();
+        
+        for (int size = 1; size <= 3; size++)
+        {
+            var zonedPositions = GetZonedPositions(zoneType).ToList();
+            if (!zonedPositions.Any()) continue;
+            
+            sections.AddRange(CalculateSectionsForSize(zonedPositions, size));
+        }
+        
+        return sections;
+    }
+
+    private List<List<Vector2>> CalculateSectionsForSize(List<Vector2> zonedPositions, int size)
+    {
+        List<List<Vector2>> sections = new List<List<Vector2>>();
+        
+        for (int i = zonedPositions.Count - 1; i >= 0; i--)
+        {
+            Vector2 start = zonedPositions[i];
+            List<Vector2> section = GetSquareSection(start, size, zonedPositions);
+            
+            if (section.Count == size * size)
+            {
+                sections.Add(section);
+                foreach (var pos in section)
+                {
+                    zonedPositions.Remove(pos);
+                }
+            }
+        }
+        
+        return sections;
     }
 
 // Helper method to get square sections of a given size
@@ -1663,5 +1688,18 @@ public class GridManager : MonoBehaviour
         availableZoneSections.Clear();
 
         CreateGrid();
+    }
+
+    public Cell GetCell(int x, int y)
+    {
+        if (x >= 0 && x < width && y >= 0 && y < height)
+        {
+            GameObject cell = gridArray[x, y];
+
+            Cell cellComponent = cell.GetComponent<Cell>();
+
+            return cellComponent;
+        }
+        return null;
     }
 }

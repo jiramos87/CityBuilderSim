@@ -2122,7 +2122,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000045775338, y: 0}
+  m_AnchoredPosition: {x: 0.0006672855, y: 0}
   m_SizeDelta: {x: -686.71, y: -4.9274}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &709582277
@@ -2850,7 +2850,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 470750414}
   m_HandleRect: {fileID: 470750413}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3566,6 +3566,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1094778208}
   m_CullTransparentMesh: 1
+--- !u!1 &1097666050
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1097666052}
+  - component: {fileID: 1097666051}
+  m_Layer: 0
+  m_Name: TerrainManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1097666051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097666050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8c3fc42c18ec4557832743410bb397c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridManager: {fileID: 1880690381}
+  zoneManager: {fileID: 955926521}
+  northSlopePrefab: {fileID: 2224226690306160349, guid: 13ba652f4fa174f1a9494270ca4c2c4d, type: 3}
+  southSlopePrefab: {fileID: 5133952661624202745, guid: 31d00874101db436f831e2bb1dcfa7a8, type: 3}
+  eastSlopePrefab: {fileID: 7113445838966405979, guid: 53a114ba05b164640870000d897d0ae8, type: 3}
+  westSlopePrefab: {fileID: 1320511209846950595, guid: f8d9880fc255347a2b91fd68d5884e2c, type: 3}
+  northEastSlopePrefab: {fileID: 314956755288790748, guid: aa60ece343405456087c0e5ef028ef36, type: 3}
+  northWestSlopePrefab: {fileID: 2878678499177400542, guid: be209671e43a0411a904da5387f76a66, type: 3}
+  southEastSlopePrefab: {fileID: 9066508454761111616, guid: 7ea11928026f5445aabceb6db04b14a0, type: 3}
+  southWestSlopePrefab: {fileID: 4496486681609493812, guid: 41a382e8bac164b1a9db9f90752fe6c8, type: 3}
+  northEastUpslopePrefab: {fileID: 8393299228354214456, guid: 896570ebc44ef4f18b857f6729df5227, type: 3}
+  northWestUpslopePrefab: {fileID: 6652725620969799647, guid: e919387993c184ea08fd205af2d9f757, type: 3}
+  southEastUpslopePrefab: {fileID: 6107455444412750235, guid: 669b2368b50174fc2b0b91cb40c33a54, type: 3}
+  southWestUpslopePrefab: {fileID: 863019582703072255, guid: 542577f3f0d634860be0887a0495125e, type: 3}
+--- !u!4 &1097666052
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097666050}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 564.56555, y: 279.55978, z: -2.3809576}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1140593662
 GameObject:
   m_ObjectHideFlags: 0
@@ -5277,7 +5335,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -23.000122, y: -166}
+  m_AnchoredPosition: {x: -23, y: -166}
   m_SizeDelta: {x: -235.22, y: -573.0851}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1710728776
@@ -6169,6 +6227,7 @@ MonoBehaviour:
   roadTilePrefabElbowDownRight: {fileID: 3629512970404794100, guid: 44dd8011f8ebf4b3287454740cbb1fdb, type: 3}
   roadTilePrefabs: []
   mouseGridPosition: {x: 0, y: 0}
+  terrainManager: {fileID: 1097666051}
 --- !u!4 &1880690382
 Transform:
   m_ObjectHideFlags: 0
@@ -7320,3 +7379,4 @@ SceneRoots:
   - {fileID: 724627294}
   - {fileID: 1770571921}
   - {fileID: 1515061136}
+  - {fileID: 1097666052}
