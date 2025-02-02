@@ -25,6 +25,7 @@ public class Cell : MonoBehaviour
 
     private string occupiedBuildingName;
     public int sortingOrder;
+    public int height;
 
     void Start()
     {
@@ -47,6 +48,7 @@ public class Cell : MonoBehaviour
         prefabName = grassPrefab.name;
         occupiedBuildingName = "";
         isPivot = false;
+        height = 1;
     }
 
     public string GetBuildingType()
@@ -118,7 +120,8 @@ public class Cell : MonoBehaviour
             zoneType = zoneType.ToString(),
             occupiedBuildingName = occupiedBuilding != null ? occupiedBuilding.name : "",
             isPivot = isPivot,
-            sortingOrder = sortingOrder
+            sortingOrder = sortingOrder,
+            height = height
         };
 
         return cellData;
@@ -142,6 +145,7 @@ public class Cell : MonoBehaviour
         zoneType = (Zone.ZoneType)System.Enum.Parse(typeof(Zone.ZoneType), cellData.zoneType);
         occupiedBuildingName = cellData.occupiedBuildingName;
         isPivot = cellData.isPivot;
+        height = cellData.height;
     }
 
     public int GetSortingOrder()

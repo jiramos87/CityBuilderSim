@@ -19,4 +19,5 @@ public class CellData
     public string occupiedBuildingName;
     public bool isPivot;
     public int sortingOrder;
+    public int height;
 }
